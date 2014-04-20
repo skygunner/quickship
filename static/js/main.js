@@ -82,68 +82,83 @@ openerp.quickship = function (instance) {
     }
     instance.web.client_actions.add('quickship.get_quotes', "instance.quickship.get_quotes");
 
+    instance.quickship.WidgetBehaviors = new (function () {
+        var that = this;
+        that.hash = "";
+
+        var addEvent = function (elem, evnt, func) {
+           if (elem.addEventListener)  // W3C DOM
+              elem.addEventListener(evnt,func,false);
+           else if (elem.attachEvent) { // IE DOM
+              elem.attachEvent("on"+evnt, func);
+           }
+           else { // No much to do
+              elem[evnt] = func;
+           }
+        }
+
+        addEvent(window, "hashchange", function () {
+            if (window.location.hash != that.hash) {
+                that._quickShipWidget.deactivate();
+            }
+        });
+
+        var api = new instance.quickship.API();
+
+        this._quickShipWidget = new openerp.quickship.QuickShipWidget(
+            new instance.scale_proxy.Scale()
+        );
+
+
+        this._quickShipWidget.on("scan", function (e, code) {
+            $("#sale_order").text("Sale Order: " + code);
+        });
+
+        this._quickShipWidget.on("weigh", function (e, weight) {
+            $("#weight").text(weight.value + " " + weight.unit + "s");
+        });
+
+        this._quickShipWidget.on("inputComplete", function (e, inputs) {
+            api.create_package(inputs.barcode, {'weight': inputs.weight})
+                .done(function (response) {
+                   if (response.success) {
+                       api.get_quotes(response.id)
+                           .done(function (result) {
+                               $(result.quotes).each(function (i, quote) {
+                                   $("#quotes_list").append("<li>" + quote.service + " - $" + quote.price.toFixed(2) + "</li>");
+                               });
+                               $("#step-2").show();
+                           });
+
+                   } else {
+                       console.log(response);
+                       instance.web.Notification.warn("Error", "Failed to create package. See JS console for details.");
+                   }
+                });
+        });
+
+        this._quickShipWidget.on("printed", function (e) {
+            $("#sale_order").text("Scan another barcode for more quotes...");
+            $("#step-2").hide();
+        });
+
+        this.activate = function () {
+            that._quickShipWidget.activate();
+        };
+
+        console.log("constructed");
+
+        return this;
+    })();
+
     instance.quickship.Widget = instance.web.Widget.extend({
         template: "quickship.widget",
         start: function () {
-            var that = this;
-            var addEvent = function (elem, evnt, func) {
-               if (elem.addEventListener)  // W3C DOM
-                  elem.addEventListener(evnt,func,false);
-               else if (elem.attachEvent) { // IE DOM
-                  elem.attachEvent("on"+evnt, func);
-               }
-               else { // No much to do
-                  elem[evnt] = func;
-               }
-            }
-            that._hash = window.location.hash;
-
-            addEvent(window, "hashchange", function () {
-                if (window.location.hash != that._hash) {
-                    that._quickShipWidget.deactivate();
-                }
-            });
-
-            var api = new instance.quickship.API();
-
+            instance.quickship.WidgetBehaviors.hash = window.location.hash;
+            instance.quickship.WidgetBehaviors.activate();
             $("#step-2").hide();
-
-            this._quickShipWidget = new openerp.quickship.QuickShipWidget(
-                new instance.scale_proxy.Scale()
-            );
-
-            this._quickShipWidget.on("scan", function (e, code) {
-                $("#sale_order").text("Sale Order: " + code);
-            });
-
-            this._quickShipWidget.on("weigh", function (e, weight) {
-                $("#weight").text(weight.value + " " + weight.unit + "s");
-            });
-
-            this._quickShipWidget.on("inputComplete", function (e, inputs) {
-                api.create_package(inputs.barcode, {'weight': inputs.weight})
-                    .done(function (response) {
-                       if (response.success) {
-                           api.get_quotes(response.id)
-                               .done(function (result) {
-                                   $(result.quotes).each(function (i, quote) {
-                                       $("#quotes_list").append("<li>" + quote.service + " - $" + quote.price.toFixed(2) + "</li>");
-                                   });
-                                   $("#step-2").show();
-                               });
-
-                       } else {
-                           console.log(response);
-                           instance.web.Notification.warn("Error", "Failed to create package. See JS console for details.");
-                       }
-                    });
-            });
-
-            this._quickShipWidget.on("printed", function (e) {
-                $("#sale_order").text("Scan another barcode for more quotes...");
-                $("#step-2").hide();
-            });
         }
     });
+
     instance.web.client_actions.add('quickship.Widget', 'instance.quickship.Widget');
 };

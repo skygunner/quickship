@@ -17,10 +17,14 @@ openerp.quickship.QuickShipWidget = (function () {
             }
         };
         that._completionBitmask = INCOMPLETE;
-        that.activate();
 
         // Barcode scanner input capturing.
         $(document).on("keypress", function (e) {
+            if (!that.isActive()) {
+                that.inputs.barcode = "";
+                return;
+            }
+
             if (e.keyCode == 13) {
                 that.trigger("scan", [that.inputs.barcode]);
                 that.updateCompletionBitmask(SCAN_COMPLETE);
@@ -29,9 +33,6 @@ openerp.quickship.QuickShipWidget = (function () {
                 that.inputs.barcode += String.fromCharCode(e.charCode);
             }
         });
-
-        // Probably not necessary, buuut...
-        $(document).focus();
     };
 
     QuickShipWidget.prototype.updateCompletionBitmask = function (bitmask) {
@@ -55,11 +56,18 @@ openerp.quickship.QuickShipWidget = (function () {
         return this._completionBitmask == INPUT_COMPLETE;
     }
 
+    QuickShipWidget.prototype.isActive = function () {
+        return this._active;
+    };
+
     QuickShipWidget.prototype.activate = function () {
         this._active = true;
 
         // Start scale input capturing.
         this._pollScale();
+
+        // Probably not necessary, buuut...
+        $(document).focus();
     };
 
     QuickShipWidget.prototype.deactivate = function () {
@@ -80,7 +88,7 @@ openerp.quickship.QuickShipWidget = (function () {
             that.trigger("weigh", that.inputs.weight);
             that.updateCompletionBitmask(WEIGH_COMPLETE);
 
-            if (that._active) {
+            if (that.isActive()) {
                 that._pollScale();
             }
         });
