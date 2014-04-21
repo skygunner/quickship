@@ -72,7 +72,7 @@ openerp.quickship = function (instance) {
 
     instance.quickship.get_label = function (parent, action) {
         var api = new instance.quickship.API();
-        return api.create_package(action.params.package_id, action.params.shipping, action.params.test);
+        return api.get_label(action.params.package_id, action.params.shipping, action.params.test);
     }
     instance.web.client_actions.add('quickship.get_label', "instance.quickship.get_label");
 
@@ -85,6 +85,7 @@ openerp.quickship = function (instance) {
     instance.quickship.WidgetBehaviors = new (function () {
         var that = this;
         that.hash = "";
+        that.package_id = null;
 
         var addEvent = function (elem, evnt, func) {
            if (elem.addEventListener)  // W3C DOM
@@ -92,7 +93,7 @@ openerp.quickship = function (instance) {
            else if (elem.attachEvent) { // IE DOM
               elem.attachEvent("on"+evnt, func);
            }
-           else { // No much to do
+           else {
               elem[evnt] = func;
            }
         }
@@ -104,40 +105,78 @@ openerp.quickship = function (instance) {
         });
 
         var api = new instance.quickship.API();
+        var printerAPI = new instance.printer_proxy.Printer();
 
         this._quickShipWidget = new openerp.quickship.QuickShipWidget(
             new instance.scale_proxy.Scale()
         );
 
-
-        this._quickShipWidget.on("scan", function (e, code) {
+        this._quickShipWidget.on("scanned", function (e, code) {
             $("#sale_order").text("Sale Order: " + code);
         });
 
-        this._quickShipWidget.on("weigh", function (e, weight) {
+        this._quickShipWidget.on("weighed", function (e, weight) {
             $("#weight").text(weight.value + " " + weight.unit + "s");
         });
 
         this._quickShipWidget.on("inputComplete", function (e, inputs) {
-            api.create_package(inputs.barcode, {'weight': inputs.weight})
+            includeLibraryMail = $("#no_library_mail:checked").length == 0;
+
+            api.create_package(inputs.keyboard, {'weight': inputs.weight})
                 .done(function (response) {
                    if (response.success) {
+                       that.package_id = response.id;
+
                        api.get_quotes(response.id)
                            .done(function (result) {
+                               that.quotes = [];
+
                                $(result.quotes).each(function (i, quote) {
-                                   $("#quotes_list").append("<li>" + quote.service + " - $" + quote.price.toFixed(2) + "</li>");
+                                   if (quote.service != "Library Mail" || includeLibraryMail) {
+                                       that.quotes.push(quote);
+                                       $("#quotes_list").append(
+                                           "<li>" + quote.service + " - $" + quote.price.toFixed(2) + "</li>"
+                                       );
+                                   }
                                });
                                $("#step-2").show();
                            });
 
                    } else {
+                       that.package_id = null;
                        console.log(response);
                        instance.web.Notification.warn("Error", "Failed to create package. See JS console for details.");
                    }
                 });
         });
 
-        this._quickShipWidget.on("printed", function (e) {
+        this._quickShipWidget.on("labelSelected", function (e, input) {
+            if (!that.package_id) {
+                console.log("No active package!");
+            }
+
+            if (isNaN(parseFloat(input)) || !isFinite(input)) {
+                console.log("'" + input + "' is not a valid number.");
+                return;
+            }
+
+            var quoteIndex = (parseFloat(input) - 1);
+            if ((quoteIndex % 1) != 0 || quoteIndex >= that.quotes.length) {
+                console.log("'" + input + "' is not a valid label selection.");
+            }
+
+            var quote = that.quotes[quoteIndex];
+
+            api.get_label(that.package_id, quote)
+                .done(function (result) {
+                    if (result.errors) {
+                        console.log(result);
+                        instance.web.Notification.warn("Error", "Failed to get label. See JS console for details.")
+                    } else {
+                        printerAPI.print("EPL2", result.label);
+                    }
+                });
+
             $("#sale_order").text("Scan another barcode for more quotes...");
             $("#step-2").hide();
         });
@@ -145,8 +184,6 @@ openerp.quickship = function (instance) {
         this.activate = function () {
             that._quickShipWidget.activate();
         };
-
-        console.log("constructed");
 
         return this;
     })();

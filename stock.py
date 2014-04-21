@@ -45,7 +45,9 @@ class stock_packages(osv.osv):
 
         if shipping["company"] == "USPS":
             usps_config = usps_api.get_config(cr, uid, sale=package.pick_id.sale_id, context=context)
-            label = usps_api.get_label(usps_config, package.pick_id, package)
+            label = usps_api.get_label(
+                usps_config, package.pick_id, package, service=shipping["service"].replace(" ", "")
+            )
 
         elif shipping["company"] == "UPS":
             label = {}
@@ -74,10 +76,10 @@ class stock_packages(osv.osv):
         usps_config = usps_api.get_config(cr, uid, sale=pkg.pick_id.sale_id, context=context)
 
         return {
-            'quotes': [
+            'quotes': sorted([
                 quote for quote in rates.usps_quotes(
-                    pkg.pick_id.sale_id, pkg, config=usps_config, test_mode=test)
-            ] #+ [
+                    pkg.pick_id.sale_id, [pkg], config=usps_config, test_mode=test).get(pkg.id, [])
+            ], key=lambda x: x["price"]) #+ [
 #                quote for quote in rates.ups_quotes(sale_obj, weight_lbs, test_mode=test)
 #            ]
         }
