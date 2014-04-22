@@ -145,7 +145,8 @@ openerp.quickship = function (instance) {
                    } else {
                        that.package_id = null;
                        console.log(response);
-                       instance.web.Notification.warn("Error", "Failed to create package. See JS console for details.");
+                       $("#sale_order").text(response.error);
+                       $("#step-2").hide();
                    }
                 });
         });
