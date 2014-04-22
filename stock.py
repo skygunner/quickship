@@ -94,13 +94,14 @@ class stock_packages(osv.osv):
         sale_order_pool = self.pool.get("sale.order")
         sale_order_id = sale_order_pool.search(cr, uid, [('name','=',sale_order)], limit=1)
 
+        # Return an error if we couldn't find a sale order by the given name,
+        if not sale_order_id:
+            return {"success": False, "error": _("Could not find sale order \"") + sale_order + "\""}
+
         if isinstance(sale_order_id, (list, tuple)):
             sale_order_id = sale_order_id[0]
 
         sale_order_obj = sale_order_pool.browse(cr, uid, sale_order_id)
-
-        if not sale_order_obj:
-            raise osv.except_osv(_("Sale Not Found"), _("Could not find sale order ") + sale_order)
 
         if not sale_order_obj.picking_ids:
             sale_order_pool.action_ship_create(self, cr, uid, sale_order_id, context=None)
