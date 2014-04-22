@@ -13,8 +13,8 @@
             <label for="autoprint">Automatically buy and print the cheapest label.</label>
         </p>
         <p>
-            <input type="checkbox" id="no_library_mail" name="autoprint" value="1" checked="checked" />
-            <label for="autoprint">Exclude "Library Mail."</label>
+            <input type="checkbox" id="no_library_mail" name="no_library_mail" value="1" checked="checked" />
+            <label for="no_library_mail">Exclude "Library Mail."</label>
         </p>
     </div>
     <div id="step-2">
