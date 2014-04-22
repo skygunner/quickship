@@ -105,7 +105,7 @@ openerp.quickship = function (instance) {
         });
 
         var api = new instance.quickship.API();
-        var printerAPI = new instance.printer_proxy.Printer();
+        var printerAPI = new instance.printer_proxy.Printer({name: "zebra"});
 
         this._quickShipWidget = new openerp.quickship.QuickShipWidget(
             new instance.scale_proxy.Scale()
