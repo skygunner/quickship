@@ -119,7 +119,7 @@ openerp.quickship = function (instance) {
             $("#weight").text(weight.value + " " + weight.unit + "s");
         });
 
-        this._quickShipWidget.on("inputComplete", function (e, inputs) {
+        this._quickShipWidget.on("awaitingLabel", function (e, inputs) {
             includeLibraryMail = $("#no_library_mail:checked").length == 0;
 
             api.create_package(inputs.keyboard, {'weight': inputs.weight})
@@ -146,6 +146,7 @@ openerp.quickship = function (instance) {
                        that.package_id = null;
                        console.log(response);
                        $("#sale_order").text(response.error);
+                       that._quickShipWidget.resetState();
                        $("#step-2").hide();
                    }
                 });
