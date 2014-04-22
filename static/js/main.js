@@ -179,6 +179,10 @@ openerp.quickship = function (instance) {
                     }
                 });
 
+            that.quotes = [];
+            that.package_id = null;
+            $("#quotes_list li").remove();
+            that._quickShipWidget.resetState();
             $("#sale_order").text("Scan another barcode for more quotes...");
             $("#step-2").hide();
         });
