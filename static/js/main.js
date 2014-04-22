@@ -99,8 +99,14 @@ openerp.quickship = function (instance) {
         }
 
         addEvent(window, "hashchange", function () {
+            if (that.hash == "") {
+                return;
+            }
+
             if (window.location.hash != that.hash) {
                 that._quickShipWidget.deactivate();
+            } else {
+                that._quickShipWidget.activate();
             }
         });
 
