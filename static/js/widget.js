@@ -82,7 +82,7 @@ openerp.quickship.QuickShipWidget = (function () {
 
         // Scale input capturing.
         // "inf" = wait until the scale returns something, no timeouts.
-        that.scale.weigh(that.scaleTimeout, "1.94 kg")
+        that.scale.weigh(that.scaleTimeout)
         .done(function (result) {
             that.inputs.weight = {
                 value: result.weight,
