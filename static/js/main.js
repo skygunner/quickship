@@ -130,6 +130,9 @@ openerp.quickship = function (instance) {
                        api.get_quotes(response.id)
                            .done(function (result) {
                                that.quotes = [];
+                               result.quotes.sort(function (a, b) {
+                                   return a.price - b.price;
+                               });
 
                                $(result.quotes).each(function (i, quote) {
                                    if (quote.service != "Library Mail" || includeLibraryMail) {
