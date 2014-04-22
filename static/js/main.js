@@ -143,6 +143,11 @@ openerp.quickship = function (instance) {
                                    }
                                });
                                $("#step-2").show();
+
+                               // Auto-select the cheapest quote if requested.
+                               if ($("#autoprint:checked").length > 0) {
+                                   that._quickShipWidget.trigger("labelSelected", ["1"]);
+                               }
                            });
 
                    } else {
