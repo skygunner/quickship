@@ -1,6 +1,6 @@
 <templates>
 <div t-name="quickship.widget" class="web_module">
-    <h1 id="quickshipHeading">QuickShip</h1>
+    <h1 id="quickshipHeading">QuickShip Kiosk</h1>
     <div id="participants">
         <div class="participant">
             <label for="picker">Picker:</label>
