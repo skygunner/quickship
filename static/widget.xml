@@ -1,6 +1,20 @@
 <templates>
 <div t-name="quickship.widget" class="web_module">
-    <h1>QuickShip</h1>
+    <h1 id="quickshipHeading">QuickShip</h1>
+    <div id="participants">
+        <div class="participant">
+            <label for="picker">Picker:</label>
+            <select id="picker"></select>
+        </div>
+        <div class="participant">
+            <label for="packer">Packer:</label>
+            <select id="packer"></select>
+        </div>
+        <div class="participant">
+            <label for="shipper">Shipper:</label>
+            <select id="shipper"></select>
+        </div>
+    </div>
     <div id="step-1">
         <p>
             <h2 id="sale_order">Scan a barcode to get shipping quotes...</h2>

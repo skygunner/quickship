@@ -35,10 +35,13 @@ openerp.quickship = function (instance) {
         },
 
         // Convenience function for creating a new package.
-        create_package: function (sale_order, pkg) {
+        create_package: function (sale_order, pkg, picker, packer, shipper) {
             return this.model.call("create_package", {
                 "sale_order": sale_order,
-                "package": pkg
+                "package": pkg,
+                "picker_id": picker,
+                "packer_id": packer,
+                "shipper_id": shipper
             });
         },
 
@@ -60,13 +63,20 @@ openerp.quickship = function (instance) {
                 params['test'] = test;
             }
             return this.model.call('get_label', [package_id], params);
+        },
+
+        // Convenience function for getting lists of pickers, packers, and shippers.
+        get_participants: function () {
+            return this.model.call('get_participants');
         }
     });
 
     // Client actions
     instance.quickship.create_package = function (parent, action) {
         var api = new instance.quickship.API();
-        return api.create_package(action.params.sale_order, action.params.package);
+        return api.create_package(action.params.sale_order, action.params.package,
+            action.params.picker, action.params.packer, action.params.shipper
+        );
     }
     instance.web.client_actions.add('quickship.create_package', "instance.quickship.create_package");
 
@@ -126,44 +136,48 @@ openerp.quickship = function (instance) {
         });
 
         this._quickShipWidget.on("awaitingLabel", function (e, inputs) {
-            includeLibraryMail = $("#no_library_mail:checked").length == 0;
+            var includeLibraryMail = $("#no_library_mail:checked").length == 0;
 
-            api.create_package(inputs.keyboard, {'weight': inputs.weight})
-                .done(function (response) {
-                   if (response.success) {
-                       that.package_id = response.id;
+            api.create_package(inputs.keyboard, {
+                'weight': inputs.weight,
+                'picker_id': $("#picker option:selected").val(),
+                'packer_id': $("#packer option:selected").val(),
+                'shipper_id': $("#shipper option:selected").val()
+            }).done(function (response) {
+               if (response.success) {
+                   that.package_id = response.id;
 
-                       api.get_quotes(response.id)
-                           .done(function (result) {
-                               that.quotes = [];
-                               result.quotes.sort(function (a, b) {
-                                   return a.price - b.price;
-                               });
-
-                               $(result.quotes).each(function (i, quote) {
-                                   if (quote.service != "Library Mail" || includeLibraryMail) {
-                                       that.quotes.push(quote);
-                                       $("#quotes_list").append(
-                                           "<li>" + quote.service + " - $" + quote.price.toFixed(2) + "</li>"
-                                       );
-                                   }
-                               });
-                               $("#step-2").show();
-
-                               // Auto-select the cheapest quote if requested.
-                               if ($("#autoprint:checked").length > 0) {
-                                   that._quickShipWidget.trigger("labelSelected", ["1"]);
-                               }
+                   api.get_quotes(response.id)
+                       .done(function (result) {
+                           that.quotes = [];
+                           result.quotes.sort(function (a, b) {
+                               return a.price - b.price;
                            });
 
-                   } else {
-                       that.package_id = null;
-                       console.log(response);
-                       $("#sale_order").text(response.error);
-                       that._quickShipWidget.resetState();
-                       $("#step-2").hide();
-                   }
-                });
+                           $(result.quotes).each(function (i, quote) {
+                               if (quote.service != "Library Mail" || includeLibraryMail) {
+                                   that.quotes.push(quote);
+                                   $("#quotes_list").append(
+                                       "<li>" + quote.service + " - $" + quote.price.toFixed(2) + "</li>"
+                                   );
+                               }
+                           });
+                           $("#step-2").show();
+
+                           // Auto-select the cheapest quote if requested.
+                           if ($("#autoprint:checked").length > 0) {
+                               that._quickShipWidget.trigger("labelSelected", ["1"]);
+                           }
+                       });
+
+               } else {
+                   that.package_id = null;
+                   console.log(response);
+                   $("#sale_order").text(response.error);
+                   that._quickShipWidget.resetState();
+                   $("#step-2").hide();
+               }
+            });
         });
 
         this._quickShipWidget.on("labelSelected", function (e, input) {
@@ -214,6 +228,23 @@ openerp.quickship = function (instance) {
             instance.quickship.WidgetBehaviors.hash = window.location.hash;
             instance.quickship.WidgetBehaviors.activate();
             $("#step-2").hide();
+
+            var api = new instance.quickship.API();
+            var $selects = {
+                pickers: $("#picker"),
+                packers: $("#packer"),
+                shippers: $("#shipper")
+            };
+
+            api.get_participants().done(function (response) {
+                for (key in response) {
+                    for (var i = 0; i < response[key].length; i++) {
+                        $selects[key].append("<option value=\"" + response[key][i].id + "\">"
+                            + response[key][i].name
+                            + "</option>");
+                    }
+                }
+            });
         }
     });
 

@@ -30,7 +30,10 @@ class stock_packages(osv.osv):
 
     _inherit = 'stock.packages'
     _columns = {
-        'shipping_company': fields.many2one("logistic.company", "Shipper"),
+        'shipping_company': fields.many2one("logistic.company", "Shipping Company"),
+        'picker_id': fields.many2one("res.users", "Picker", required=True),
+        'packer_id': fields.many2one("res.users", "Packer", required=True),
+        'shipper_id': fields.many2one("res.users", "Shipper", required=True),
     #    'shipping_service':,
     }
     
@@ -84,6 +87,25 @@ class stock_packages(osv.osv):
 #            ]
         }
 
+    def get_participants(self, cr, uid):
+        """Return a dictionary of pickers and packers."""
+        group_pool = self.pool.get('res.groups')
+        picker_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Picker')]))
+        packer_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Packer')]))
+        shipper_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Shipper')]))
+
+        return {
+            "pickers": [
+                {'name': picker.name, 'id': picker.id}  for group in picker_groups for picker in group.users
+            ],
+            "packers": [
+                {'name': packer.name, 'id': packer.id}  for group in packer_groups for packer in group.users
+            ],
+            "shippers": [
+                {'name': shipper.name, 'id': shipper.id}  for group in shipper_groups for shipper in group.users
+            ]
+        }
+
     def create_package(self, cr, uid, sale_order=None, package=None, test=False):
         '''Creates a package and adds it to the sale order's delivery order'''
 
@@ -115,9 +137,20 @@ class stock_packages(osv.osv):
             package['weight']['value'] = float(Decimal(package['weight']['value']) * Decimal("2.2046"))
             package['weight']['unit'] = "pound"
 
-        package_id = self.pool.get("stock.packages").create(
-            cr, uid, {'weight': package["weight"]["value"], "pick_id": picking_id.id}
-        )
+        # Required attributes.
+        properties = {'weight': package["weight"]["value"], "pick_id": picking_id.id}
+
+        # Set picker, packer, and shipper, if supplied.
+        if "picker_id" in package and package["picker_id"]:
+            properties['picker_id'] = package["picker_id"]
+
+        if "packer_id" in package and package["packer_id"]:
+            properties['packer_id'] = package["packer_id"]
+
+        if "shipper_id" in package and package["shipper_id"]:
+            properties['shipper_id'] = package["shipper_id"]
+
+        package_id = self.pool.get("stock.packages").create(cr, uid, properties)
 
         return {"id": package_id, "success": True}
 

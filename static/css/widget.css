@@ -2,6 +2,15 @@
     margin-left: 2em;
 }
 
+#quickshipHeading {
+    float: left;
+    clear: left;
+}
+
+#step-1 {
+    clear: left;
+}
+
 #step-1, #step-2 {
     float: left;
 }
@@ -10,4 +19,24 @@
     padding-left: 1em;
     margin-left: 1em;
     border-left: thin solid black;
+}
+
+#participants {
+    float: right;
+    clear: right;
+    margin: 1.24em;
+}
+
+#participants .participant {
+    float: left;
+    border-right: thin solid gray;
+    padding: 0px 1em;
+}
+
+#participants .participant:first-child {
+    padding-left: 0px;
+}
+
+#participants .participant:last-child {
+    border-right: 0px;
 }
