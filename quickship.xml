@@ -1,10 +1,10 @@
 <openerp>
     <data>
         <record model="ir.actions.client" id="action_client_quickship">
-            <field name="name">QuickShip</field>
+            <field name="name">Kiosk</field>
             <field name="tag">quickship.Widget</field>
         </record>
-        <menuitem action="action_client_quickship"
-                  id="menu_client_quickship" />
+        <menuitem id="menu_stock_quickship" name="QuickShip" parent="stock.menu_stock_root" />
+        <menuitem action="action_client_quickship" id="menu_client_quickship" parent="menu_stock_quickship" />
     </data>
 </openerp>
