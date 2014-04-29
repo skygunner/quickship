@@ -92,7 +92,7 @@ openerp.quickship = function (instance) {
     }
     instance.web.client_actions.add('quickship.get_quotes', "instance.quickship.get_quotes");
 
-    instance.quickship.WidgetBehaviors = new (function () {
+    instance.quickship.KioskBehaviors = new (function () {
         var that = this;
         that.hash = "";
         that.package_id = null;
@@ -114,28 +114,28 @@ openerp.quickship = function (instance) {
             }
 
             if (window.location.hash != that.hash) {
-                that._quickShipWidget.deactivate();
+                that._quickShipKiosk.deactivate();
             } else {
-                that._quickShipWidget.activate();
+                that._quickShipKiosk.activate();
             }
         });
 
         var api = new instance.quickship.API();
         var printerAPI = new instance.printer_proxy.Printer({name: "zebra"});
 
-        this._quickShipWidget = new openerp.quickship.QuickShipWidget(
+        this._quickShipKiosk = new openerp.quickship.QuickShipKiosk(
             new instance.scale_proxy.Scale()
         );
 
-        this._quickShipWidget.on("scanned", function (e, code) {
+        this._quickShipKiosk.on("scanned", function (e, code) {
             $("#sale_order").text("Sale Order: " + code);
         });
 
-        this._quickShipWidget.on("weighed", function (e, weight) {
+        this._quickShipKiosk.on("weighed", function (e, weight) {
             $("#weight").text(weight.value + " " + weight.unit + "s");
         });
 
-        this._quickShipWidget.on("awaitingLabel", function (e, inputs) {
+        this._quickShipKiosk.on("awaitingLabel", function (e, inputs) {
             var includeLibraryMail = $("#no_library_mail:checked").length == 0;
 
             api.create_package(inputs.keyboard, {
@@ -166,7 +166,7 @@ openerp.quickship = function (instance) {
 
                            // Auto-select the cheapest quote if requested.
                            if ($("#autoprint:checked").length > 0) {
-                               that._quickShipWidget.trigger("labelSelected", ["1"]);
+                               that._quickShipKiosk.trigger("labelSelected", ["1"]);
                            }
                        });
 
@@ -174,13 +174,13 @@ openerp.quickship = function (instance) {
                    that.package_id = null;
                    console.log(response);
                    $("#sale_order").text(response.error);
-                   that._quickShipWidget.resetState();
+                   that._quickShipKiosk.resetState();
                    $("#step-2").hide();
                }
             });
         });
 
-        this._quickShipWidget.on("labelSelected", function (e, input) {
+        this._quickShipKiosk.on("labelSelected", function (e, input) {
             if (!that.package_id) {
                 console.log("No active package!");
             }
@@ -210,23 +210,23 @@ openerp.quickship = function (instance) {
             that.quotes = [];
             that.package_id = null;
             $("#quotes_list li").remove();
-            that._quickShipWidget.resetState();
+            that._quickShipKiosk.resetState();
             $("#sale_order").text("Scan another barcode for more quotes...");
             $("#step-2").hide();
         });
 
         this.activate = function () {
-            that._quickShipWidget.activate();
+            that._quickShipKiosk.activate();
         };
 
         return this;
     })();
 
-    instance.quickship.Widget = instance.web.Widget.extend({
-        template: "quickship.widget",
+    instance.quickship.Kiosk = instance.web.Widget.extend({
+        template: "quickship.kiosk",
         start: function () {
-            instance.quickship.WidgetBehaviors.hash = window.location.hash;
-            instance.quickship.WidgetBehaviors.activate();
+            instance.quickship.KioskBehaviors.hash = window.location.hash;
+            instance.quickship.KioskBehaviors.activate();
             $("#step-2").hide();
 
             var api = new instance.quickship.API();
@@ -247,6 +247,6 @@ openerp.quickship = function (instance) {
             });
         }
     });
+    instance.web.client_actions.add('quickship.Kiosk', 'instance.quickship.Kiosk');
 
-    instance.web.client_actions.add('quickship.Widget', 'instance.quickship.Widget');
 };
