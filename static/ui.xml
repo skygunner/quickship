@@ -1,0 +1,89 @@
+<templates>
+<div t-name="quickship.kiosk" class="web_module">
+    <h1 id="quickshipHeading">QuickShip Kiosk</h1>
+    <div id="participants">
+        <div class="participant">
+            <label for="picker">Picker:</label>
+            <select id="picker"></select>
+        </div>
+        <div class="participant">
+            <label for="packer">Packer:</label>
+            <select id="packer"></select>
+        </div>
+        <div class="participant">
+            <label for="shipper">Shipper:</label>
+            <select id="shipper"></select>
+        </div>
+    </div>
+    <div id="step-1">
+        <p>
+            <h2 id="sale_order">Scan a barcode to get shipping quotes...</h2>
+        </p>
+        <p>
+            <h2 id="scale">Weight: <span id="weight">0.00</span></h2>
+        </p>
+        <p>
+            <input type="checkbox" id="autoprint" name="autoprint" value="1"/>
+            <label for="autoprint">Automatically buy and print the cheapest label.</label>
+        </p>
+        <p>
+            <input type="checkbox" id="no_library_mail" name="no_library_mail" value="1" checked="checked" />
+            <label for="no_library_mail">Exclude "Library Mail."</label>
+        </p>
+    </div>
+    <div id="step-2">
+        <p id="shipping_quotes">
+            <h2>Select a label to print:</h2>
+            <ol id="quotes_list"></ol>
+        </p>
+    </div>
+</div>
+
+<div t-name="quickship.stats" id="quickship_stats" class="web_module">
+    <h1 id="quickshipStatsHeading">QuickShip Stats</h1>
+    <div id="statsControl">
+        <label for="from">Show stats from</label>
+        <input type="text" id="from" name="from" />
+        <label for="to">to</label>
+        <input type="text" id="to" name="to" />
+    </div>
+    <div class="stats">
+        <h2 id="pickersHeading">Pickers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Packages</th>
+                </tr>
+            </thead>
+            <tbody id="pickers"></tbody>
+        </table>
+    </div>
+
+    <div class="stats">
+        <h2 id="packersHeading">Packers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Packages</th>
+                </tr>
+            </thead>
+            <tbody id="packers"></tbody>
+        </table>
+    </div>
+
+    <div class="stats">
+        <h2 id="shippersHeading">Shippers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Packages</th>
+                </tr>
+            </thead>
+            <tbody id="shippers"></tbody>
+        </table>
+    </div>
+</div>
+</templates>

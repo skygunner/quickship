@@ -1,6 +1,6 @@
-openerp.quickship.QuickShipWidget = (function () {
+openerp.quickship.QuickShipKiosk = (function () {
 
-    var QuickShipWidget = function (scale, scaleTimeout) {
+    var QuickShipKiosk = function (scale, scaleTimeout) {
         var that = this;
         that.scale = scale;
         that.scaleTimeout = scaleTimeout ? scaleTimeout : 2; // Long-polling timeout in seconds.
@@ -38,7 +38,7 @@ openerp.quickship.QuickShipWidget = (function () {
         });
     };
 
-    QuickShipWidget.prototype.resetState = function () {
+    QuickShipKiosk.prototype.resetState = function () {
         this.state = {
             scanned: false,
             weighed: false,
@@ -47,11 +47,11 @@ openerp.quickship.QuickShipWidget = (function () {
         }
     };
 
-    QuickShipWidget.prototype.on = function (event, handler) {
+    QuickShipKiosk.prototype.on = function (event, handler) {
         $(this).on("quickship." + event, handler);
     };
 
-    QuickShipWidget.prototype.trigger = function (event, params) {
+    QuickShipKiosk.prototype.trigger = function (event, params) {
         $(this).trigger("quickship." + event, params);
 
         if (event in this.state) {
@@ -59,11 +59,11 @@ openerp.quickship.QuickShipWidget = (function () {
         }
     };
 
-    QuickShipWidget.prototype.isActive = function () {
+    QuickShipKiosk.prototype.isActive = function () {
         return this._active;
     };
 
-    QuickShipWidget.prototype.activate = function () {
+    QuickShipKiosk.prototype.activate = function () {
         this._active = true;
 
         // Start scale input capturing.
@@ -73,16 +73,16 @@ openerp.quickship.QuickShipWidget = (function () {
         $(document).focus();
     };
 
-    QuickShipWidget.prototype.deactivate = function () {
+    QuickShipKiosk.prototype.deactivate = function () {
         this._active = false;
     };
 
-    QuickShipWidget.prototype._pollScale = function () {
+    QuickShipKiosk.prototype._pollScale = function () {
         var that = this;
 
         // Scale input capturing.
         // "inf" = wait until the scale returns something, no timeouts.
-        that.scale.weigh(that.scaleTimeout)
+        that.scale.weigh(that.scaleTimeout, "1.94 kg")
         .done(function (result) {
             that.inputs.weight = {
                 value: result.weight,
@@ -100,5 +100,5 @@ openerp.quickship.QuickShipWidget = (function () {
         });
     };
 
-    return QuickShipWidget;
+    return QuickShipKiosk;
 })();

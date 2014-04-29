@@ -29,8 +29,8 @@
     'depends': ['web', 'scale_proxy', 'printer_proxy', 'shipping_api_price_comparison', 'shipping_api_usps', 'stock'],
     'data': ['quickship.xml','security/groups.xml'],
     'css': ['static/css/widget.css'],
-    'js': ['static/js/main.js', 'static/js/widget.js'],
-    'qweb': ['static/widget.xml'],
+    'js': ['static/js/main.js', 'static/js/kiosk.js'],
+    'qweb': ['static/ui.xml'],
     'test': ['static/test/main.js'],
     'installable': True,
     'active': True
