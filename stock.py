@@ -29,12 +29,17 @@ from ..shipping_api_usps.api import v1 as usps_api
 class stock_packages(osv.osv):
 
     _inherit = 'stock.packages'
+    _log_access = True
     _columns = {
         'shipping_company': fields.many2one("logistic.company", "Shipping Company"),
         'picker_id': fields.many2one("res.users", "Picker", required=True),
         'packer_id': fields.many2one("res.users", "Packer", required=True),
         'shipper_id': fields.many2one("res.users", "Shipper", required=True),
+        'created': fields.datetime('created')
     #    'shipping_service':,
+    }
+    _defaults = {
+        'created': fields.datetime.now
     }
     
     def get_label(self, cr, uid, package_id, shipping=None, test=None, context=None):
@@ -103,6 +108,52 @@ class stock_packages(osv.osv):
             ],
             "shippers": [
                 {'name': shipper.name, 'id': shipper.id}  for group in shipper_groups for shipper in group.users
+            ]
+        }
+
+    def get_stats(self, cr, uid, fromDate, toDate, test=False):
+        """Return a dictionary of pickers and packers."""
+        package_pool = self.pool.get('stock.packages')
+        group_pool = self.pool.get('res.groups')
+        picker_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Picker')]))
+        packer_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Packer')]))
+        shipper_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Shipper')]))
+
+        dateParams = []
+
+        if fromDate:
+            dateParams.append(('created', '>=', fromDate))
+
+        if toDate:
+            dateParams.append(('created', '<=', toDate))
+
+        return {
+            "pickers": [
+                {
+                    'name': picker.name,
+                    'package_count': package_pool.search(
+                        cr, uid, [('id','in',[pkg.id for pkg in picker.packages_picked])] + dateParams, count=True
+                    ),
+                    'id': picker.id
+                } for group in picker_groups for picker in group.users
+            ],
+            "packers": [
+                {
+                    'name': packer.name,
+                    'package_count': package_pool.search(
+                        cr, uid, [('id','in',[pkg.id for pkg in packer.packages_packed])] + dateParams, count=True
+                    ),
+                    'id': packer.id
+                } for group in packer_groups for packer in group.users
+            ],
+            "shippers": [
+                {
+                    'name': shipper.name,
+                    'package_count': package_pool.search(
+                        cr, uid, [('id','in',[pkg.id for pkg in shipper.packages_shipped])] + dateParams, count=True
+                    ),
+                    'id': shipper.id
+                } for group in shipper_groups for shipper in group.users
             ]
         }
 

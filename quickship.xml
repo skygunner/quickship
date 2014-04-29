@@ -4,7 +4,12 @@
             <field name="name">Kiosk</field>
             <field name="tag">quickship.Kiosk</field>
         </record>
+        <record model="ir.actions.client" id="action_client_quickship_stats">
+            <field name="name">Stats</field>
+            <field name="tag">quickship.Stats</field>
+        </record>>
         <menuitem id="menu_stock_quickship" name="QuickShip" parent="stock.menu_stock_root" />
         <menuitem action="action_client_quickship" id="menu_client_quickship" parent="menu_stock_quickship" />
+        <menuitem action="action_client_quickship_stats" id="menu_client_quickship_stats" parent="menu_stock_quickship" />
     </data>
 </openerp>

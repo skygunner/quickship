@@ -2,6 +2,20 @@
     margin-left: 2em;
 }
 
+.stats {
+    float: left;
+    margin: 0px 1em;
+}
+
+.stats:first-of-type {
+    clear: left;
+}
+
+#statsControl {
+    clear: both;
+    margin-left: 1em;
+}
+
 #quickshipHeading {
     float: left;
     clear: left;
@@ -39,4 +53,12 @@
 
 #participants .participant:last-child {
     border-right: 0px;
+}
+
+#quickship_stats th, #quickship_stats td {
+    padding: 4px 14px 4px 8px;
+}
+
+#quickship_stats td.packages {
+    text-align: center;
 }

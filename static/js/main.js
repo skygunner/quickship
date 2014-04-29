@@ -68,6 +68,11 @@ openerp.quickship = function (instance) {
         // Convenience function for getting lists of pickers, packers, and shippers.
         get_participants: function () {
             return this.model.call('get_participants');
+        },
+
+        // Convenience function for getting stats.
+        get_stats: function (fromDate, toDate) {
+            return this.model.call('get_stats', [fromDate, toDate]);
         }
     });
 
@@ -249,4 +254,54 @@ openerp.quickship = function (instance) {
     });
     instance.web.client_actions.add('quickship.Kiosk', 'instance.quickship.Kiosk');
 
+    instance.quickship.Stats = instance.web.Widget.extend({
+        template: "quickship.stats",
+        init: function () {
+            this.stats = {"pickers":[], "packers":[], "shippers":[]};
+            this.api = new instance.quickship.API();
+        },
+        start: function () {
+            var that = this;
+
+            var refresh_stats = function () {
+                that.api.get_stats($("#from").val(), $("#to").val()).done(function (stats) {
+                    var $tbody;
+                    var user;
+
+                    for (key in stats) {
+                        $tbody = $("#" + key);
+                        $("tr", $tbody).remove();
+
+                        for (var i=0; i < stats[key].length; i++) {
+                            user = stats[key][i];
+                            $tbody.append("<tr><td>" + user.name + "</td>"
+                                +"<td class=\"packages\">" + user.package_count + "</td></tr>");
+                        }
+                    }
+                });
+            };
+            refresh_stats();
+
+            $( "#from:not(.hasDatepicker)" ).datepicker({
+              defaultDate: "+1w",
+              changeMonth: true,
+              numberOfMonths: 2,
+              onClose: function( selectedDate ) {
+                $( "#to" ).datepicker( "option", "minDate", selectedDate );
+                refresh_stats();
+              }
+            });
+
+            $( "#to:not(.hasDatepicker)" ).datepicker({
+              defaultDate: "+1w",
+              changeMonth: true,
+              numberOfMonths: 2,
+              onClose: function( selectedDate ) {
+                $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+                refresh_stats();
+              }
+            });
+        }
+    });
+    instance.web.client_actions.add('quickship.Stats', 'instance.quickship.Stats');
 };
