@@ -130,29 +130,29 @@ class stock_packages(osv.osv):
         return {
             "pickers": [
                 {
+                    'id': picker.id,
                     'name': picker.name,
                     'package_count': package_pool.search(
                         cr, uid, [('id','in',[pkg.id for pkg in picker.packages_picked])] + dateParams, count=True
-                    ),
-                    'id': picker.id
+                    )
                 } for group in picker_groups for picker in group.users
             ],
             "packers": [
                 {
+                    'id': packer.id,
                     'name': packer.name,
                     'package_count': package_pool.search(
                         cr, uid, [('id','in',[pkg.id for pkg in packer.packages_packed])] + dateParams, count=True
-                    ),
-                    'id': packer.id
+                    )
                 } for group in packer_groups for packer in group.users
             ],
             "shippers": [
                 {
+                    'id': shipper.id,
                     'name': shipper.name,
                     'package_count': package_pool.search(
                         cr, uid, [('id','in',[pkg.id for pkg in shipper.packages_shipped])] + dateParams, count=True
-                    ),
-                    'id': shipper.id
+                    )
                 } for group in shipper_groups for shipper in group.users
             ]
         }
