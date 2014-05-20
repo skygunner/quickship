@@ -84,18 +84,22 @@ openerp.quickship.QuickShipKiosk = (function () {
         // "inf" = wait until the scale returns something, no timeouts.
         that.scale.weigh(that.scaleTimeout)
         .done(function (result) {
+            if (that.isActive()) {
+                that._pollScale();
+            }
+
+            if (!result) {
+                return;
+            }
+
             that.inputs.weight = {
                 value: result.weight,
                 unit: result.unit
             };
             that.trigger("weighed", that.inputs.weight);
 
-            if (that.state.scanned && !that.state.awaitingLabel) {
+            if (result.weight > 0 && that.state.scanned && !that.state.awaitingLabel) {
                 that.trigger("awaitingLabel", [that.inputs]);
-            }
-
-            if (that.isActive()) {
-                that._pollScale();
             }
         });
     };
