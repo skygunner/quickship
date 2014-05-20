@@ -177,7 +177,7 @@ class stock_packages(osv.osv):
         sale_order_obj = sale_order_pool.browse(cr, uid, sale_order_id)
 
         if not sale_order_obj.picking_ids:
-            sale_order_pool.action_ship_create(self, cr, uid, sale_order_id, context=None)
+            sale_order_pool.action_ship_create(cr, uid, [sale_order_id])
             sale_order_obj = sale_order_pool.browse(cr, uid, sale_order_id) # Reload sale_order from DB.
 
         picking_id = sale_order_obj.picking_ids[0]
