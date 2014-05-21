@@ -256,15 +256,12 @@ openerp.quickship = function (instance) {
 
     instance.quickship.Stats = instance.web.Widget.extend({
         template: "quickship.stats",
-        init: function () {
-            this.stats = {"pickers":[], "packers":[], "shippers":[]};
-            this.api = new instance.quickship.API();
-        },
         start: function () {
             var that = this;
 
             var refresh_stats = function () {
-                that.api.get_stats($("#from").val(), $("#to").val()).done(function (stats) {
+                var api = new instance.quickship.API();
+                api.get_stats($("#from").val(), $("#to").val()).done(function (stats) {
                     var $tbody;
                     var user;
 
