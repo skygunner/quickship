@@ -171,6 +171,15 @@ class stock_packages(osv.osv):
         # Required attributes.
         properties = {'weight': package["scale"]["weight"], "pick_id": picking_id.id}
 
+        # Set package number.
+        properties["packge_no"] = sorted(picking_id.packages_ids, key=lambda pkg: pkg.packge_no, reverse=True)[0].packge_no
+        properties["packge_no"] = int(properties["packge_no"])+1 if properties["packge_no"] else 1
+
+        # Set length, width, and height, if supplied.
+        for field in ["length", "height", "width"]:
+            if package.get(field):
+                properties[field] = package[field]
+
         # Set picker, packer, and shipper, if supplied.
         user_pool = self.pool.get("res.users")
         for field in ["picker_id", "packer_id", "shipper_id"]:
