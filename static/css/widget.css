@@ -36,9 +36,10 @@
 }
 
 #participants {
-    float: right;
-    clear: right;
-    margin: 1.24em;
+    position: absolute;
+    right: 0px;
+    top: 32px;
+    margin: 1.25em;
 }
 
 #participants .participant {
@@ -61,4 +62,63 @@
 
 #quickship_stats td.packages {
     text-align: center;
+}
+
+#postageBalance {
+    position: fixed;
+    bottom: 0px;
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+#quickship_kiosk input:focus {
+    background-color: yellow;
+}
+
+.foundicon-lock, .foundicon-unlock {
+    cursor: pointer;
+    vertical-align: text-bottom;
+}
+
+.foundicon-lock, .foundicon-unlock:hover {
+    color: black;
+}
+
+.foundicon-lock:hover, .foundicon-unlock {
+    color: inherit;
+}
+
+h2 input {
+    height: 1.5em;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+#box_dimensions input {
+    width: 2em;
+}
+
+#step-1 h2 label, #step-1 h4 label {
+    position: absolute;
+    margin-top: 0.25em;
+}
+
+#step-1 h2 input, #step-1 h2 span {
+    margin-left: 6em;
+}
+
+#step-1 h2 span {
+    line-height: 1.65em;
+}
+
+#step-1 h4 span {
+    margin-left: 9em;
+}
+
+#quotes_list li.selected {
+    background-color: yellow;
+}
+
+#quote_selected, #step-2 p button:first-child {
+    margin-left: 1.6em;
 }

@@ -64,7 +64,8 @@ class stock_packages(osv.osv):
             return {"error": "Shipping company '%s' not recognized." % shipping['company']}
 
         return {
-            'label': base64.b64encode(label.label)
+            'label': base64.b64encode(label.label),
+            'postage_balance': label.postage_balance
         }
 
     def get_quotes(self, cr, uid, package_id, test=None, context=None):
@@ -92,32 +93,11 @@ class stock_packages(osv.osv):
 #            ]
         }
 
-    def get_participants(self, cr, uid):
-        """Return a dictionary of pickers and packers."""
-        group_pool = self.pool.get('res.groups')
-        picker_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Picker')]))
-        packer_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Packer')]))
-        shipper_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Shipper')]))
-
-        return {
-            "pickers": [
-                {'name': picker.name, 'id': picker.id}  for group in picker_groups for picker in group.users
-            ],
-            "packers": [
-                {'name': packer.name, 'id': packer.id}  for group in packer_groups for packer in group.users
-            ],
-            "shippers": [
-                {'name': shipper.name, 'id': shipper.id}  for group in shipper_groups for shipper in group.users
-            ]
-        }
-
     def get_stats(self, cr, uid, fromDate, toDate, test=False):
         """Return a dictionary of pickers and packers."""
         package_pool = self.pool.get('stock.packages')
-        group_pool = self.pool.get('res.groups')
-        picker_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Picker')]))
-        packer_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Packer')]))
-        shipper_groups = group_pool.browse(cr, uid, group_pool.search(cr, uid, [('name','=','Shipper')]))
+        user_pool = self.pool.get('res.users')
+        quickshippers = user_pool.browse(cr, uid, user_pool.search(cr, uid, [('quickship_id','!=','')]))
 
         dateParams = []
 
@@ -128,33 +108,33 @@ class stock_packages(osv.osv):
             dateParams.append(('created', '<=', toDate))
 
         return {
-            "pickers": [
+            "pickers": sorted([
                 {
-                    'id': picker.id,
-                    'name': picker.name,
+                    'id': user.id,
+                    'name': user.name,
                     'package_count': package_pool.search(
-                        cr, uid, [('id','in',[pkg.id for pkg in picker.packages_picked])] + dateParams, count=True
+                        cr, uid, [('id','in',[pkg.id for pkg in user.packages_picked])] + dateParams, count=True
                     )
-                } for group in picker_groups for picker in group.users
-            ],
-            "packers": [
+                } for user in quickshippers
+            ], key=lambda u: u['package_count'], reverse=True),
+            "packers": sorted([
                 {
-                    'id': packer.id,
-                    'name': packer.name,
+                    'id': user.id,
+                    'name': user.name,
                     'package_count': package_pool.search(
-                        cr, uid, [('id','in',[pkg.id for pkg in packer.packages_packed])] + dateParams, count=True
+                        cr, uid, [('id','in',[pkg.id for pkg in user.packages_packed])] + dateParams, count=True
                     )
-                } for group in packer_groups for packer in group.users
-            ],
-            "shippers": [
+                } for user in quickshippers
+            ], key=lambda u: u['package_count'], reverse=True),
+            "shippers": sorted([
                 {
-                    'id': shipper.id,
-                    'name': shipper.name,
+                    'id': user.id,
+                    'name': user.name,
                     'package_count': package_pool.search(
-                        cr, uid, [('id','in',[pkg.id for pkg in shipper.packages_shipped])] + dateParams, count=True
+                        cr, uid, [('id','in',[pkg.id for pkg in user.packages_shipped])] + dateParams, count=True
                     )
-                } for group in shipper_groups for shipper in group.users
-            ]
+                } for user in quickshippers
+            ], key=lambda u: u['package_count'], reverse=True)
         }
 
     def create_package(self, cr, uid, sale_order=None, package=None, test=False):
@@ -184,22 +164,27 @@ class stock_packages(osv.osv):
 
         # We store weight in pounds.
         # TODO: Make dynamic based on locale.
-        if package['weight']['unit'] == "kilogram":
-            package['weight']['value'] = float(Decimal(package['weight']['value']) * Decimal("2.2046"))
-            package['weight']['unit'] = "pound"
+        if package['scale']['unit'] == "kilogram":
+            package['scale']['weight'] = float(Decimal(package['scale']['weight']) * Decimal("2.2046"))
+            package['scale']['unit'] = "pound"
 
         # Required attributes.
-        properties = {'weight': package["weight"]["value"], "pick_id": picking_id.id}
+        properties = {'weight': package["scale"]["weight"], "pick_id": picking_id.id}
 
         # Set picker, packer, and shipper, if supplied.
-        if "picker_id" in package and package["picker_id"]:
-            properties['picker_id'] = package["picker_id"]
+        user_pool = self.pool.get("res.users")
+        for field in ["picker_id", "packer_id", "shipper_id"]:
+            if package.get(field):
+                properties[field] = user_pool.search(cr, uid, [("quickship_id","=",package[field])], limit=1)
 
-        if "packer_id" in package and package["packer_id"]:
-            properties['packer_id'] = package["packer_id"]
-
-        if "shipper_id" in package and package["shipper_id"]:
-            properties['shipper_id'] = package["shipper_id"]
+                if properties[field]:
+                    properties[field] = properties[field][0]
+                else:
+                    return {
+                        "success": False,
+                        "error": "Invalid value for %s! (\"%s\")" % (field, package[field]),
+                        "field": field
+                    }
 
         package_id = self.pool.get("stock.packages").create(cr, uid, properties)
 

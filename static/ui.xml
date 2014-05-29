@@ -1,26 +1,49 @@
 <templates>
-<div t-name="quickship.kiosk" class="web_module">
+<div t-name="quickship.kiosk" id="quickship_kiosk" class="web_module">
     <h1 id="quickshipHeading">QuickShip Kiosk</h1>
-    <div id="participants">
-        <div class="participant">
-            <label for="picker">Picker:</label>
-            <select id="picker"></select>
-        </div>
-        <div class="participant">
-            <label for="packer">Packer:</label>
-            <select id="packer"></select>
-        </div>
-        <div class="participant">
-            <label for="shipper">Shipper:</label>
-            <select id="shipper"></select>
-        </div>
-    </div>
     <div id="step-1">
+        <div id="participants">
+            <div class="participant">
+                <label for="picker_id">Picker:</label>
+                <input id="picker_id" type="text" maxlength="2"></input>
+            </div>
+            <div class="participant">
+                <label for="packer_id">Packer:</label>
+                <input id="packer_id" type="text" maxlength="2"></input>
+            </div>
+            <div class="participant">
+                <label for="shipper_id">Shipper:</label>
+                <input id="shipper_id" type="text" maxlength="2"></input>
+            </div>
+        </div>
+
         <p>
-            <h2 id="sale_order">Scan a barcode to get shipping quotes...</h2>
+            <h2>
+                <label for="sale_order">Sale ID:</label>
+                <input id="sale_order"></input>
+            </h2>
         </p>
         <p>
-            <h2 id="scale">Weight: <span id="weight">0.00</span></h2>
+            <h2 id="scale">
+                <label for="weight">Weight:</label>
+                <span id="weight">0.00</span>
+                <input id="weight_value" type="hidden"></input>
+                <input id="weight_unit" type="hidden"></input>
+            </h2>
+        </p>
+        <p>
+            <h2>
+                <label for="box_code">Box Code:</label>
+                <input id="box_code"></input>
+            </h2>
+            <h4>
+                <label for="box_dimensions">Dimensions:</label>
+                <span id="box_dimensions">
+                    <input id="box_length" maxlength="2" placeholder="L"></input>
+                    x <input id="box_width" maxlength="2" placeholder="W"></input>
+                    x <input id="box_height" maxlength="2" placeholder="H"></input>
+                </span>
+            </h4>
         </p>
         <p>
             <input type="checkbox" id="autoprint" name="autoprint" value="1"/>
@@ -35,7 +58,15 @@
         <p id="shipping_quotes">
             <h2>Select a label to print:</h2>
             <ol id="quotes_list"></ol>
+            <input id="quote_selected"></input>
         </p>
+        <p>
+            <button id="quote_okay">Okay</button>
+            <button id="quote_cancel">Cancel</button>
+        </p>
+    </div>
+    <div id="postageBalance">
+        <p>USPS Postage Remaining: <span id="uspsBalance"></span></p>
     </div>
 </div>
 
@@ -48,7 +79,7 @@
         <input type="text" id="to" name="to" />
     </div>
     <div class="stats">
-        <h2 id="pickersHeading">Pickers</h2>
+        <h2 id="pickersHeading">Picking</h2>
         <table>
             <thead>
                 <tr>
@@ -61,7 +92,7 @@
     </div>
 
     <div class="stats">
-        <h2 id="packersHeading">Packers</h2>
+        <h2 id="packersHeading">Packing</h2>
         <table>
             <thead>
                 <tr>
@@ -74,7 +105,7 @@
     </div>
 
     <div class="stats">
-        <h2 id="shippersHeading">Shippers</h2>
+        <h2 id="shippersHeading">Shipping</h2>
         <table>
             <thead>
                 <tr>
