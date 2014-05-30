@@ -178,9 +178,9 @@ namespace.View.prototype.setBoxDimensions = function (dimensions) {
  */
 namespace.View.prototype.getDimensions = function () {
     return {
-        length: this.box.$length.val(),
-        width: this.box.$width.val(),
-        height: this.box.$height.val()
+        length: parseFloat(this.box.$length.val()),
+        width: parseFloat(this.box.$width.val()),
+        height: parseFloat(this.box.$height.val())
     };
 };
 
