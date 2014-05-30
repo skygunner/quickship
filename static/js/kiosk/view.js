@@ -289,7 +289,7 @@ namespace.View.prototype._setupProperties = function () {
     this.$quote_cancel = $("#quote_cancel");
     this.$usps_balance = $('#uspsBalance');
     this.$inputs = $("#quickship_kiosk input");
-    this.$step1_inputs = $("#quickship_kiosk #step-1 input");
+    this.$step1_inputs = $("#quickship_kiosk #step-1 input:not(#box_code)");
     this.$no_library_mail = $("#no_library_mail");
     this.$autoprint = $("#autoprint");
 };
