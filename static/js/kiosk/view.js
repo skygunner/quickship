@@ -156,7 +156,7 @@ namespace.View.prototype.getSaleOrder = function () {
  *
  * @returns {*}
  */
-namespace.View.prototype.getBoxCode = function () {
+namespace.View.prototype.getPackageCode = function () {
     return this.box.$code.val();
 };
 
