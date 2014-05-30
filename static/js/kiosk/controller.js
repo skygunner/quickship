@@ -71,6 +71,19 @@ namespace.Controller.prototype.initUspsBalance = function () {
 };
 
 /**
+ * Set the shipper ID default value.
+ */
+namespace.Controller.prototype.initShipperID = function () {
+    var that = this;
+
+    that.model
+        .getQuickshipID()
+        .done(function (quickship_id) {
+            that.view.setShipper(quickship_id);
+        });
+}
+
+/**
  * Takes a number corresponding to the position of a label in the list of
  * quotes and prints the label. 1-indexed, to match the UI numbering.
  *
