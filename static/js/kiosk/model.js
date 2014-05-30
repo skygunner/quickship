@@ -12,6 +12,7 @@ namespace.Model = function Model (api, printerAPI, scaleAPI) {
     this._printerAPI = printerAPI;
     this._scaleAPI = scaleAPI;
     this._package_id = null;
+    this._cache = {};
     this.reset();
 };
 
@@ -55,23 +56,75 @@ namespace.Model.prototype.weigh = decorators.deferrable(function (ret, timeout) 
  * @param callback (optional)
  * @return {{*}}
  */
-namespace.Model.prototype.getUspsAccount = decorators.deferrable(function (ret) {
-    ret.resolve(this._api.usps_rpc('account_status'));
+namespace.Model.prototype.getUspsAccount = decorators.deferrable(function (ret, test) {
+    this._api.get_usps_account(test).done(function (response) {ret.resolve(response)});
 });
 
 /**
- * Takes a box code and returns that box's dimensions.
+ * Returns the dimensions for a given package if a code is specified.
+ * Returns a mapping of codes to dimensions if a code is not specified.
  *
- * @param box_code
+ * @param code (optional)
+ * @param bypassCache (optional)
  * @param callback (optional)
- * @returns {{length: number, width: number, height: number}}
+ * @return {{*}}
  */
-namespace.Model.prototype.getBoxDimensions = decorators.deferrable(function (ret, box_code) {
-    ret.resolve({
-        length: 10,
-        width: 10,
-        height: 10
-    });
+namespace.Model.prototype.getPackageDimensions = decorators.deferrable(function (ret, code, bypassCache) {
+    var that = this;
+
+    if (bypassCache || typeof(that._cache.getPackageDimensions) == "undefined") {
+        that._api.get_package_types().done(function (response) {
+            var dimensions = {};
+
+            for (var i=0; i < response.length; i++) {
+                dimensions[response[i].code] = {
+                    length: response[i].length,
+                    width: response[i].width,
+                    height: response[i].height
+                };
+            }
+            that._cache.getPackageDimensions = dimensions;
+
+            if (code) {
+                ret.resolve(dimensions[code]);
+            } else {
+                ret.resolve(dimensions);
+            }
+        });
+    } else {
+        if (code) {
+            ret.resolve(that._cache.getPackageDimensions[code]);
+        } else {
+            ret.resolve(that._cache.getPackageDimensions);
+        }
+    }
+});
+
+/**
+ * Takes a sale order code and returns its OpenERP ID.
+ *
+ * @param sale_order_code
+ * @return sale_order_id
+ */
+namespace.Model.prototype.getSaleOrderID = decorators.deferrable(function (ret, sale_order_code, bypassCache) {
+    var that = this;
+
+    if (typeof(that._cache.getSaleOrderID) == "undefined") {
+        that._cache.getSaleOrderID = {};
+    }
+
+    if (bypassCache || typeof(that._cache.getSaleOrderID[sale_order_code] == "undefined")) {
+        this._api.get_sale_order(sale_order_code).done(function (sale_orders) {
+            if (sale_orders && sale_orders.length > 0) {
+                that._cache.getSaleOrderID[sale_order_code] = sale_orders[0].id;
+                ret.resolve(sale_orders[0].id);
+            } else {
+                ret.reject(sale_orders);
+            }
+        });
+    } else {
+        ret.resolve(that._cache.getSaleOrderID[sale_order_code]);
+    }
 });
 
 /**
@@ -83,17 +136,17 @@ namespace.Model.prototype.getBoxDimensions = decorators.deferrable(function (ret
  * @param callback (optional)
  */
 namespace.Model.prototype.getQuotes = decorators.deferrable(
-    function (ret, sale_order, package, include_library_mail) {
+    function (ret, sale_order, pkg, include_library_mail) {
         var that = this;
 
-        that._api
-        .create_package(sale_order, package)
+/*        that._api
+        .get_quotes(sale_order, package)
         .done(function (response) {
            if (response.success) {
                that._package_id = response.id;
-
+*/
                that._api
-               .get_quotes(that._package_id)
+               .get_quotes(sale_order, pkg)
                .done(function (result) {
                    that._quotes = [];
 
@@ -109,11 +162,11 @@ namespace.Model.prototype.getQuotes = decorators.deferrable(
 
                    ret.resolve(that._quotes);
                });
-           } else {
+/*           } else {
                that._package_id = null;
                ret.reject(response);
            }
-        });
+        });*/
     }
 );
 
@@ -178,4 +231,21 @@ namespace.Model.prototype.getLabel = decorators.deferrable(function (ret, packag
  */
 namespace.Model.prototype.print = decorators.deferrable(function (ret, format, data) {
     ret.resolve(this._printerAPI.print(format, data));
+});
+
+/**
+ * Optionally takes a user ID and returns the user's QuickShip ID.
+ * If no user ID is passed in, returns the current user's QuickShip ID.
+ *
+ * @param user_id (optional)
+ * @return quickship_id
+ */
+namespace.Model.prototype.getQuickshipID = decorators.deferrable(function (ret, user_id) {
+    this._api.get_quickship_id(user_id)
+        .done(function (quickship_id) {
+            ret.resolve(quickship_id);
+        })
+        .fail(function (response) {
+            ret.reject(response);
+        });
 });
