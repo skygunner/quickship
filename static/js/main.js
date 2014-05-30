@@ -8,22 +8,21 @@ openerp.quickship = function (instance) {
 
     // Client actions
     instance.quickship.create_package = function (parent, action) {
-        var api = new instance.quickship.API();
-        return api.create_package(action.params.sale_order, action.params.package,
+        return instance.quickship._api.create_package(action.params.sale_order, action.params.package,
             action.params.picker, action.params.packer, action.params.shipper
         );
     }
     instance.web.client_actions.add('quickship.create_package', "instance.quickship.create_package");
 
     instance.quickship.get_label = function (parent, action) {
-        var api = new instance.quickship.API();
-        return api.get_label(action.params.package_id, action.params.shipping, action.params.test);
+        return instance.quickship._api.get_label(
+            action.params.package_id, action.params.shipping, action.params.test);
     }
     instance.web.client_actions.add('quickship.get_label', "instance.quickship.get_label");
 
     instance.quickship.get_quotes = function (parent, action) {
-        var api = new instance.quickship.API();
-        return api.get_quotes(action.params.package_id, action.params.weight, action.params.test);
+        return instance.quickship._api.get_quotes(
+            action.params.package_id, action.params.weight, action.params.test);
     }
     instance.web.client_actions.add('quickship.get_quotes', "instance.quickship.get_quotes");
 
