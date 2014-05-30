@@ -134,6 +134,15 @@ namespace.View.prototype.getShipper = function () {
 };
 
 /**
+ * Sets the current shipper ID>
+ *
+ * @param shipper_id
+ */
+namespace.View.prototype.setShipper = function (shipper_id) {
+    this.$shipper.val(shipper_id);
+};
+
+/**
  * Gets the current sale order ID.
  *
  * @returns {*}
