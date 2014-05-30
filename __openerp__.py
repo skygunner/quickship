@@ -32,6 +32,9 @@
         'security/groups.xml',
         'res_users_view.xml'
     ],
+    'init_xml': [
+        'data/shipping.package.type.xml'
+    ],
     'css': ['static/css/widget.css', 'static/css/general_foundicons.css', 'static/css/general_foundicons_ie7.css'],
     'js': [
         'static/js/lib/namespace.js',

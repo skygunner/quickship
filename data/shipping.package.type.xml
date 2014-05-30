@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data noupdate="True">
+        <record id="quickship_package_type1" model="shipping.package.type">
+            <field name="name">6 X 4 X 3-1/2</field>
+            <field name="code">137</field>
+            <field name="length">6</field>
+            <field name="width">4</field>
+            <field name="height">3.5</field>
+        </record>
+        <record id="quickship_package_type2" model="shipping.package.type">
+            <field name="name">8 x 6 x 5</field>
+            <field name="code">335</field>
+            <field name="length">8</field>
+            <field name="width">6</field>
+            <field name="height">5</field>
+        </record>
+        <record id="quickship_package_type3" model="shipping.package.type">
+            <field name="name">13 x 10 x 4</field>
+            <field name="code">161</field>
+            <field name="length">13</field>
+            <field name="width">10</field>
+            <field name="height">4</field>
+        </record>
+        <record id="quickship_package_type4" model="shipping.package.type">
+            <field name="name">12 1/2 x 12 1/2 x 1/2-2 VERIFOLD WHITE</field>
+            <field name="code">6V</field>
+            <field name="length">12.5</field>
+            <field name="width">12.5</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type5" model="shipping.package.type">
+            <field name="name">12-1/2 x 12-1/2 x 8</field>
+            <field name="code">378</field>
+            <field name="length">12.5</field>
+            <field name="width">12.5</field>
+            <field name="height">8</field>
+        </record>
+        <record id="quickship_package_type6" model="shipping.package.type">
+            <field name="name">12-1/2 x 12-1/2 x 10-1/2 </field>
+            <field name="code">379</field>
+            <field name="length">12.5</field>
+            <field name="width">12.5</field>
+            <field name="height">10.5</field>
+        </record>
+        <record id="quickship_package_type7" model="shipping.package.type">
+            <field name="name">13 x 13 x 4-1/2</field>
+            <field name="code">386</field>
+            <field name="length">13</field>
+            <field name="width">13</field>
+            <field name="height">4.5</field>
+        </record>
+        <record id="quickship_package_type8" model="shipping.package.type">
+            <field name="name">14 x 14 x 6</field>
+            <field name="code">92</field>
+            <field name="length">14</field>
+            <field name="width">14</field>
+            <field name="height">6</field>
+        </record>
+        <record id="quickship_package_type9" model="shipping.package.type">
+            <field name="name">14 x 14 x 14 SCORED AT TOP </field>
+            <field name="code">2262</field>
+            <field name="length">14</field>
+            <field name="width">14</field>
+            <field name="height">14</field>
+        </record>
+        <record id="quickship_package_type10" model="shipping.package.type">
+            <field name="name">15 x 10 x 5</field>
+            <field name="code">122</field>
+            <field name="length">15</field>
+            <field name="width">10</field>
+            <field name="height">5</field>
+        </record>
+        <record id="quickship_package_type11" model="shipping.package.type">
+            <field name="name">16 x 16 x 16 SCORED AT TOP</field>
+            <field name="code">2263</field>
+            <field name="length">16</field>
+            <field name="width">16</field>
+            <field name="height">16</field>
+        </record>
+        <record id="quickship_package_type12" model="shipping.package.type">
+            <field name="name">18 x 16 x 4</field>
+            <field name="code">544</field>
+            <field name="length">18</field>
+            <field name="width">16</field>
+            <field name="height">4</field>
+        </record>
+        <record id="quickship_package_type13" model="shipping.package.type">
+            <field name="name">18 x 16 x 8</field>
+            <field name="code">710</field>
+            <field name="length">18</field>
+            <field name="width">16</field>
+            <field name="height">8</field>
+        </record>
+        <record id="quickship_package_type14" model="shipping.package.type">
+            <field name="name">18 x 16 x 12</field>
+            <field name="code">291</field>
+            <field name="length">18</field>
+            <field name="width">16</field>
+            <field name="height">12</field>
+        </record>
+        <record id="quickship_package_type15" model="shipping.package.type">
+            <field name="name">18 x 14 3/4 x 15 7/8</field>
+            <field name="code">779</field>
+            <field name="length">18</field>
+            <field name="width">15</field>
+            <field name="height">16</field>
+        </record>
+        <record id="quickship_package_type16" model="shipping.package.type">
+            <field name="name">19 x 6 x 4</field>
+            <field name="code">218</field>
+            <field name="length">19</field>
+            <field name="width">6</field>
+            <field name="height">4</field>
+        </record>
+        <record id="quickship_package_type17" model="shipping.package.type">
+            <field name="name">19 x 12 x 4</field>
+            <field name="code">784</field>
+            <field name="length">19</field>
+            <field name="width">12</field>
+            <field name="height">4</field>
+        </record>
+        <record id="quickship_package_type18" model="shipping.package.type">
+            <field name="name">22 x 10 x 9</field>
+            <field name="code">231</field>
+            <field name="length">22</field>
+            <field name="width">10</field>
+            <field name="height">9</field>
+        </record>
+        <record id="quickship_package_type19" model="shipping.package.type">
+            <field name="name">22 x 22 x 6</field>
+            <field name="code">690</field>
+            <field name="length">22</field>
+            <field name="width">22</field>
+            <field name="height">6</field>
+        </record>
+        <record id="quickship_package_type20" model="shipping.package.type">
+            <field name="name">24 x 18 x 12</field>
+            <field name="code">260</field>
+            <field name="length">24</field>
+            <field name="width">18</field>
+            <field name="height">12</field>
+        </record>
+        <record id="quickship_package_type21" model="shipping.package.type">
+            <field name="name">25 x 17 x 15</field>
+            <field name="code">263</field>
+            <field name="length">25</field>
+            <field name="width">17</field>
+            <field name="height">15</field>
+        </record>
+        <record id="quickship_package_type22" model="shipping.package.type">
+            <field name="name">29 x 17 x 15</field>
+            <field name="code">247</field>
+            <field name="length">29</field>
+            <field name="width">17</field>
+            <field name="height">15</field>
+        </record>
+        <record id="quickship_package_type23" model="shipping.package.type">
+            <field name="name">PADDED ENV 5 x 10 (0)</field>
+            <field name="code">10M</field>
+            <field name="length">10</field>
+            <field name="width">5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type24" model="shipping.package.type">
+            <field name="name">PADDED ENV 8-1/2 x 12 (2)</field>
+            <field name="code">12M</field>
+            <field name="length">12</field>
+            <field name="width">8.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type25" model="shipping.package.type">
+            <field name="name">PADDED ENV 9-1/2 x 14-1/2 (4)</field>
+            <field name="code">14M</field>
+            <field name="length">14.5</field>
+            <field name="width">9.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type26" model="shipping.package.type">
+            <field name="name">PADDED ENV 12-1/2 x 19 (6)</field>
+            <field name="code">19M</field>
+            <field name="length">19</field>
+            <field name="width">12.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type27" model="shipping.package.type">
+            <field name="name">2 Rigi Mailer 8 1/2 x 10 1/2 YELLOW</field>
+            <field name="code">2</field>
+            <field name="length">10.5</field>
+            <field name="width">8.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type28" model="shipping.package.type">
+            <field name="name">4 Rigi Mailer 9 1/2 x 13 YELLOW</field>
+            <field name="code">4</field>
+            <field name="length">13</field>
+            <field name="width">9.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type29" model="shipping.package.type">
+            <field name="name">6 Rigi Mailer 12 1/2 x 15 YELLOW</field>
+            <field name="code">6</field>
+            <field name="length">15</field>
+            <field name="width">12.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type30" model="shipping.package.type">
+            <field name="name">7 Rigi Mailer 14 1/4 x 18 1/2 YELLOW</field>
+            <field name="code">7</field>
+            <field name="length">18.5</field>
+            <field name="width">14.5</field>
+            <field name="height">0.5</field>
+        </record>
+        <record id="quickship_package_type31" model="shipping.package.type">
+            <field name="name">4 X 4 2mil Ziplock Polybag</field>
+            <field name="code">404</field>
+            <field name="length">4</field>
+            <field name="width">4</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type32" model="shipping.package.type">
+            <field name="name">4 x 6 2mil Ziplock Polybag </field>
+            <field name="code">406</field>
+            <field name="length">6</field>
+            <field name="width">4</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type33" model="shipping.package.type">
+            <field name="name">5 x 8 2mil Ziplock Polybag</field>
+            <field name="code">508</field>
+            <field name="length">8</field>
+            <field name="width">5</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type34" model="shipping.package.type">
+            <field name="name">6 x 10 2mil Ziplock Polybag</field>
+            <field name="code">610</field>
+            <field name="length">10</field>
+            <field name="width">6</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type35" model="shipping.package.type">
+            <field name="name">10 X 13 2mil Ziplock Polybag</field>
+            <field name="code">1013</field>
+            <field name="length">13</field>
+            <field name="width">10</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type36" model="shipping.package.type">
+            <field name="name">13 x 15 2mil Ziplock Polybag</field>
+            <field name="code">1315</field>
+            <field name="length">15</field>
+            <field name="width">13</field>
+            <field name="height">1</field>
+        </record>
+        <record id="quickship_package_type37" model="shipping.package.type">
+            <field name="name">Packing list bag 4 /2 x 5 1/2 backloading</field>
+            <field name="code">51</field>
+            <field name="length">5.5</field>
+            <field name="width">4.5</field>
+            <field name="height">1</field>
+        </record>
+    </data>
+</openerp>
