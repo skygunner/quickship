@@ -176,7 +176,7 @@ namespace.View.prototype.setBoxDimensions = function (dimensions) {
  *
  * @returns {{length: *, width: *, height: *}}
  */
-namespace.View.prototype.getBoxDimensions = function () {
+namespace.View.prototype.getDimensions = function () {
     return {
         length: this.box.$length.val(),
         width: this.box.$width.val(),
