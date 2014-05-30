@@ -266,7 +266,7 @@ namespace.Controller.prototype._setupBoxCodeSelectedEvent = function () {
     var that = this;
     that.view.box.$code.on("change", function () {
         that.model
-            .getBoxDimensions(that.view.getBoxCode())
+            .getPackageDimensions(that.view.getPackageCode())
             .done(function (dimensions) {
                 if (dimensions) {
                     that.view.setBoxDimensions(dimensions);
