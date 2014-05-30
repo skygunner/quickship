@@ -55,11 +55,17 @@ namespace.Controller.prototype.setupEvents = function () {
  * Set the initial USPS account balance in the View.
  */
 namespace.Controller.prototype.initUspsBalance = function () {
-    this.model
+    var that = this;
+
+    that.model
         .getUspsAccount()
-        .done(function (account) {
-            if (account.postage_balance) {
-                this.view.updateUspsBalance(account.postage_balance);
+        .done(function (response) {
+            if (response.postage_balance) {
+                that.view.updateUspsBalance(response.postage_balance);
+            }
+            if (response.error) {
+                that.options.logger.error("Error retrieving USPS balance: \"" + response.error + "\"");
+                that.options.message.error("Could not retrieve USPS balance!");
             }
         });
 };
