@@ -320,33 +320,41 @@ namespace.Controller.prototype._setupInputCompleteEvent = function () {
 
         if (!that.view.showingQuotes() && emptyInputs.length == 0) {
             var includeLibraryMail = that.view.includeLibraryMail();
+            var dimensions = that.view.getDimensions();
             var pkg = {
                 'scale': that.view.getWeight(),
+                'length': dimensions.length,
+                'width': dimensions.width,
+                'height': dimensions.height,
                 'picker_id': that.view.getPicker(),
                 'packer_id': that.view.getPacker(),
                 'shipper_id': that.view.getShipper()
             };
 
             that.model
-                .getQuotes(that.view.getSaleOrder(), pkg, includeLibraryMail)
-                .done(function (quotes) {
-                    // Auto-select the cheapest quote if requested.
-                    if (that.view.autoprint()) {
-                        that.printLabel(1);
+                .getSaleOrderID(that.view.getSaleOrder())
+                .done(function (sale_id) {
+                    that.model
+                        .getQuotes(sale_id, pkg, includeLibraryMail)
+                        .done(function (quotes) {
+                            // Auto-select the cheapest quote if requested.
+                            if (that.view.autoprint()) {
+                                that.printLabel(1);
 
-                   // Otherwise display the quotes for the user to select.
-                   } else {
-                       that.view.showQuotes(quotes);
-                   }
+                           // Otherwise display the quotes for the user to select.
+                           } else {
+                               that.view.showQuotes(quotes);
+                           }
+                        })
+                        .fail(function (response) {
+                            that.options.logger.error(response);
+                            that.options.message.error(response.error);
+
+                            if (response.field) {
+                                that.view.elementByField(response.field).val('').focus();
+                            }
+                        });
                 })
-                .fail(function (response) {
-                    that.options.logger.error(response);
-                    that.options.message.error(response.error);
-
-                    if (response.field) {
-                        that.view.elementByField(response.field).val('').focus();
-                    }
-                });
         }
     });
 };
