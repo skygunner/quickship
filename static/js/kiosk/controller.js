@@ -125,6 +125,13 @@ namespace.Controller.prototype.printLabel = function (list_selection) {
 };
 
 /**
+ * Tells the Controller's Model to load the package dimensions object into its cache.
+ */
+namespace.Controller.prototype.preloadPackageDimensions = function () {
+    this.model.getPackageDimensions();
+}
+
+/**
  * Takes an options object, fills in its omitted fields with defaults, and returns it.
  *
  * @param userOptions
