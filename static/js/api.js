@@ -3,9 +3,12 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         init: function(options){
             options = options || {};
 
-            this.connection = new instance.web.JsonRPC();
-            this.connection.setup(options.url || 'http://localhost:8069');
-            this.model = new instance.web.Model('stock.packages');
+            this.rpc = new instance.web.JsonRPC();
+            this.rpc.setup(options.url || 'http://localhost:8069');
+            this.packages = new instance.web.Model('stock.packages');
+            this.users = new instance.web.Model('res.users');
+            this.package_types = new instance.web.Model('shipping.package.type');
+            this.sales = new instance.web.Model('sale.order');
             this.notifications = {};
         },
 
@@ -17,7 +20,7 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
                 callbacks[i](params);
             }
 
-            this.connection.rpc('/' + endpoint + '/' + name, params || {}).done(function(result) {
+            this.rpc.rpc('/' + endpoint + '/' + name, params || {}).done(function(result) {
                 ret.resolve(result);
             }).fail(function(error) {
                 ret.reject(error);
@@ -43,7 +46,7 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
 
         // Convenience function for creating a new package.
         create_package: function (sale_order, pkg, picker, packer, shipper) {
-            return this.model.call("create_package", {
+            return this.packages.call("create_package", {
                 "sale_order": sale_order,
                 "package": pkg,
                 "picker_id": picker,
@@ -53,13 +56,13 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         },
 
         // Convenience function for getting quotes for a package.
-        get_quotes: function (package_id, test) {
-            var params = {};
+        get_quotes: function (sale_id, pkg, test) {
+            var kwargs = {};
 
             if (test !== undefined) {
-                params['test'] = test;
+                kwargs['test'] = test;
             }
-            return this.model.call('get_quotes', [package_id], params);
+            return this.packages.call('get_quotes', [sale_id, pkg], kwargs);
         },
 
         // Convenience function for getting the label for a package.
@@ -69,12 +72,36 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
             if (test !== undefined) {
                 params['test'] = test;
             }
-            return this.model.call('get_label', [package_id], params);
+            return this.packages.call('get_label', [package_id], params);
         },
 
         // Convenience function for getting stats.
         get_stats: function (fromDate, toDate) {
-            return this.model.call('get_stats', [fromDate, toDate]);
+            return this.packages.call('get_stats', [fromDate, toDate]);
+        },
+
+        get_usps_account: function (test) {
+            kwargs = {}
+            if (typeof (test) !== "undefined") {
+                kwargs = {test: Boolean(test)}
+            }
+            return this.users.call('account_status', [], kwargs);
+        },
+
+        get_package_types: function () {
+            return this.package_types.query(['code', 'length', 'width', 'height']).all();
+        },
+
+        get_sale_order: function (code) {
+            return this.sales.query(['id', 'name']).filter([['name', '=', code]]).all();
+        },
+
+        get_quickship_id: function (user_id) {
+            kwargs = {}
+            if (user_id) {
+                kwargs["user_id"] = user_id;
+            }
+            return this.users.call('get_quickship_id', [], kwargs);
         }
     }))();
 };
