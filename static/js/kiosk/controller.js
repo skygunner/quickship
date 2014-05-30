@@ -20,6 +20,8 @@ namespace.Controller = function (model, view, options) {
     this.setupEvents();
     this.initUspsBalance();
     this.activate();
+    this.initShipperID();
+    this.preloadPackageDimensions();
 };
 
 /**
