@@ -20,11 +20,13 @@
 ##############################################################################
 
 import base64
+from collections import namedtuple
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from decimal import Decimal
-from ..shipping_api_price_comparison.helpers import rates
 from ..shipping_api_usps.api import v1 as usps_api
+
+PackageWrapper = namedtuple("PackageWrapper", ['weight', 'length', 'width', 'height'])
 
 class stock_packages(osv.osv):
 
@@ -68,8 +70,18 @@ class stock_packages(osv.osv):
             'postage_balance': label.postage_balance
         }
 
-    def get_quotes(self, cr, uid, package_id, test=None, context=None):
+    def get_quotes(self, cr, uid, sale_id, pkg, test=None, context=None):
         '''Returns a list of all shipping options'''
+
+        # Convert kilograms to pounds?
+        if pkg['scale']['unit'] == "kilogram":
+            pkg['scale']['weight'] = float(Decimal(pkg['scale']['weight']) * Decimal("2.2046"))
+            pkg['scale']['unit'] = "pound"
+
+        # Wrap our package dictionary so we can pass it safely to the USPS API.
+        pkg = PackageWrapper(
+            weight=pkg["scale"]["weight"], length=pkg["length"], width=pkg["width"], height=pkg["height"]
+        )
 
         # Return immediately if we're just checking endpoints.
         if test:
@@ -81,13 +93,12 @@ class stock_packages(osv.osv):
                 }]
             }
 
-        pkg = self.pool.get("stock.packages").browse(cr, uid, package_id)
-        usps_config = usps_api.get_config(cr, uid, sale=pkg.pick_id.sale_id, context=context)
+        sale = self.pool.get("sale.order").browse(cr, uid, sale_id)
+        usps_config = usps_api.get_config(cr, uid, sale=sale, context=context)
 
         return {
             'quotes': sorted([
-                quote for quote in rates.usps_quotes(
-                    pkg.pick_id.sale_id, [pkg], config=usps_config, test_mode=test).get(pkg.id, [])
+                quote for quote in usps_api.get_quotes(usps_config, sale, pkg, test=test)
             ], key=lambda x: x["price"]) #+ [
 #                quote for quote in rates.ups_quotes(sale_obj, weight_lbs, test_mode=test)
 #            ]
