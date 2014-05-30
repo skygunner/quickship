@@ -48,6 +48,7 @@ namespace.Controller.prototype.setupEvents = function () {
     that._setupSelectedQuoteCancelButton();
     that._setupInputCompleteEvent();
     that._setupBoxCodeSelectedEvent();
+    that._setupSaleOrderChangeEvent();
 };
 
 /**
@@ -259,6 +260,24 @@ namespace.Controller.prototype._setupBoxCodeSelectedEvent = function () {
                 }
             });
     });
+};
+
+/**
+ * Set up an event to check sale order codes as they get entered.
+ *
+ * @private
+ */
+namespace.Controller.prototype._setupSaleOrderChangeEvent = function () {
+    var that = this;
+
+    that.view.$sale_order.on("change", function () {
+        that.model
+            .getSaleOrderID(that.view.getSaleOrder())
+            .fail(function () {
+                that.view.$sale_order.val('').focus();
+                that.options.message.error("Invalid sale order!")
+            })
+    })
 };
 
 /**
