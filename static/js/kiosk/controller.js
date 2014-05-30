@@ -19,15 +19,15 @@ namespace.Controller = function (model, view, options) {
 
     this.setupEvents();
     this.initUspsBalance();
-    this.activate();
     this.initShipperID();
     this.preloadPackageDimensions();
+    this.activateScalePolling();
 };
 
 /**
  * Kicks off background polling.
  */
-namespace.Controller.prototype.activate = function () {
+namespace.Controller.prototype.activateScalePolling = function () {
     this._scale_polling = true;
     this._pollScale();
 };
@@ -35,7 +35,7 @@ namespace.Controller.prototype.activate = function () {
 /**
  * Stops background polling.
  */
-namespace.Controller.prototype.deactivate = function () {
+namespace.Controller.prototype.deactivateScalePolling = function () {
     this._scale_polling = false;
 };
 
@@ -211,9 +211,9 @@ namespace.Controller.prototype._setupHashChangeEvent = function () {
         }
 
         if (window.location.hash != that._kioskHash) {
-            that.deactivate();
+            that.deactivateScalePolling();
         } else {
-            that.activate();
+            that.activateScalePolling();
         }
     });
 };
