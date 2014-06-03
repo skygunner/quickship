@@ -69,6 +69,15 @@
     bottom: 0px;
     font-weight: bold;
     font-size: 1.25em;
+    -moz-box-shadow: 0px -10px 10px rgba(255,255,255,1);
+    -webkit-box-shadow: 0px -10px 10px rgba(255,255,255,1);
+    box-shadow: 0px -10px 10px rgba(255,255,255,1);
+    background: white;
+    width: 100%;
+}
+
+#postageBalance p {
+    margin-top: 0.75em;
 }
 
 #quickship_kiosk input:focus {
@@ -94,13 +103,13 @@ h2 input {
     font-weight: bold;
 }
 
-#box_dimensions input {
+#box_dimensions input, #num_packages {
     width: 2em;
 }
 
 #step-1 h2 label, #step-1 h4 label {
     position: absolute;
-    margin-top: 0.25em;
+    margin-top: 0.3em;
 }
 
 #step-1 h2 input, #step-1 h2 span {
@@ -115,10 +124,80 @@ h2 input {
     margin-left: 9em;
 }
 
+#step-1 h4>input {
+    margin-left: 8.8em;
+}
+
+h4 i.foundicon-lock, h4 i.foundicon-unlock {
+    margin-left: 0.25em;
+}
+
 #quotes_list li.selected {
     background-color: yellow;
 }
 
-#quote_selected, #step-2 p button:first-child {
+#quote_selected {
+    display: block;
+}
+
+#quote_selected, #step-2 button#quote_okay {
     margin-left: 1.6em;
+}
+
+
+#step-2 button {
+    margin-top: 0.5em;
+}
+
+h2#scale {
+    clear: left;
+}
+
+h2#scale label {
+    position: inherit;
+}
+
+h2#scale #weight {
+    margin-left: 2em;
+}
+
+.subform h2 {
+    border-bottom: thin solid black;
+}
+
+.subform {
+    margin: 1em 0px 3em 0px;
+    float: left;
+}
+
+#manual_entry {
+    float: left;
+    clear: left;
+    display: none;
+}
+
+#to_address {
+    margin-left: 2em;
+}
+
+#sale_order_container {
+    clear: both;
+    float: left;
+}
+
+#sale_order_container h2 {
+    margin-bottom: 0em;
+}
+
+.left {
+    float: left;
+    clear: left;
+}
+
+#step-2 {
+    margin-top: 1em;
+}
+
+#step-2 h2 {
+    margin-top: 0.3em;
 }
