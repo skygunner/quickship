@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-import time
+import collections, time, urllib2
 import openerp.addons.web.http as http
 from ..shipping_api_usps.api import v1 as usps_api
 from openerp.osv import fields,osv
+
+MockResponse = collections.namedtuple("MockResponse", ["message"])
 
 class res_users(osv.osv):
     _inherit = "res.users"
@@ -18,7 +20,11 @@ class res_users(osv.osv):
     def account_status(self, cr, uid, test=None):
         '''Get the user's current account info..'''
         config = usps_api.get_config(cr, uid)
-        response = usps_api.get_account_status(config, test=(test if test != None else config.sandbox))
+
+        try:
+            response = usps_api.get_account_status(config, test=(test if test != None else config.sandbox))
+        except urllib2.URLError:
+            response = MockResponse("Could not connect to Endicia!")
 
         if hasattr(response, 'postage_balance'):
             return {'success': True, 'postage_balance': response.postage_balance}
