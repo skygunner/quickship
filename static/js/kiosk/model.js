@@ -11,7 +11,6 @@ namespace.Model = function Model (api, printerAPI, scaleAPI) {
     this._api = api;
     this._printerAPI = printerAPI;
     this._scaleAPI = scaleAPI;
-    this._package_id = null;
     this._cache = {};
     this.reset();
 };
@@ -21,8 +20,7 @@ namespace.Model = function Model (api, printerAPI, scaleAPI) {
  */
 namespace.Model.prototype.reset = function () {
     this._quotes = [];
-    this._package_id = null;
-}
+};
 
 /**
  * Gets a reading from the scale proxy server.
@@ -136,39 +134,56 @@ namespace.Model.prototype.getSaleOrderID = decorators.deferrable(function (ret, 
  * @param callback (optional)
  */
 namespace.Model.prototype.getQuotes = decorators.deferrable(
-    function (ret, sale_order, pkg, include_library_mail) {
+    function (ret, pkg, sale_id, from_address, to_address, include_library_mail) {
         var that = this;
 
-/*        that._api
-        .get_quotes(sale_order, package)
-        .done(function (response) {
-           if (response.success) {
-               that._package_id = response.id;
-*/
-               that._api
-               .get_quotes(sale_order, pkg)
-               .done(function (result) {
-                   that._quotes = [];
+        that._api
+        .get_quotes(pkg, sale_id, from_address, to_address)
+        .done(function (result) {
+           that._quotes = [];
 
-                   // Sort quotes by price.
-                   result.quotes.sort(function (a, b) {
-                       return a.price - b.price;
-                   });
-
-                   // Filter out library mail, if user requested this.
-                   that._quotes = result.quotes.filter(function (quote) {
-                       return quote.service != "Library Mail" || include_library_mail;
-                   })
-
-                   ret.resolve(that._quotes);
-               });
-/*           } else {
-               that._package_id = null;
-               ret.reject(response);
+           // Did we succeed or fail?
+           if (result.error) {
+               ret.reject(result);
+               return;
            }
-        });*/
+
+           // Sort quotes by price.
+           result.quotes.sort(function (a, b) {
+               return a.price - b.price;
+           });
+
+           // Filter out library mail, if user requested this.
+           that._quotes = result.quotes.filter(function (quote) {
+               return quote.service != "Library Mail" || include_library_mail;
+           })
+
+           ret.resolve(that._quotes);
+        });
     }
 );
+
+/**
+ * Create a package on the specified sale order.
+ *
+ * @param sale_order
+ * @param package
+ */
+namespace.Model.prototype.createPackage = decorators.deferrable(function (ret, pkg, sale_id) {
+    var that = this;
+
+    that._api
+        .create_package(pkg, sale_id)
+        .done(function (response) {
+           if (response.success) {
+               that._pkg_id = response.id;
+               ret.resolve(response);
+           } else {
+               that._pkg_id = null;
+               ret.reject(response);
+           }
+        });
+});
 
 /**
  * Return a quote in our quotes cache, specified by 0-based index.
@@ -177,8 +192,8 @@ namespace.Model.prototype.getQuotes = decorators.deferrable(
  * @returns {*}
  */
 namespace.Model.prototype.getQuote = function (index) {
-    if (!this._package_id) {
-        throw "No active package!"
+    if (!this._quotes) {
+        throw "No quotes to pick from!"
     }
 
     if ((index % 1) != 0 || index >= this._quotes.length) {
@@ -188,16 +203,7 @@ namespace.Model.prototype.getQuote = function (index) {
 };
 
 /**
- * Returns the ID of the package we're currently operating on.
- *
- * @returns {null|*}
- */
-namespace.Model.prototype.getPackageID = function () {
-    return this._package_id;
-}
-
-/**
- * Generates a label from a label quote.
+ * Generates a label from a package ID.
  * If no callback is passed in, it runs synchronously and returns the server's response as an object.
  * If a callback is passed in, it runs asynchronously and passes the server's response to the callback,
  * returning nothing.
@@ -210,8 +216,8 @@ namespace.Model.prototype.getPackageID = function () {
  * @param callback (optional)
  * @returns undefined || {{*}}
  */
-namespace.Model.prototype.getLabel = decorators.deferrable(function (ret, package_id, quote) {
-    this._api.get_label(package_id, quote)
+namespace.Model.prototype.getLabelByPackageID = decorators.deferrable(function (ret, package_id, quote) {
+    this._api.get_label_by_package_id(package_id, quote)
         .done(function (result) {
             if (!result || !result.label) {
                 ret.reject(result, "Unable to generate label!");
@@ -220,6 +226,32 @@ namespace.Model.prototype.getLabel = decorators.deferrable(function (ret, packag
             }
         });
 });
+
+/**
+ * Generates a label from a package object.
+ * If no callback is passed in, it runs synchronously and returns the server's response as an object.
+ * If a callback is passed in, it runs asynchronously and passes the server's response to the callback,
+ * returning nothing.
+ *
+ * The callback should expect to take the server's response object as its first argument and an error
+ * message as an optional second argument.
+ *
+ * @param package_id
+ * @param quote
+ * @param callback (optional)
+ * @returns undefined || {{*}}
+ */
+namespace.Model.prototype.getLabelByPackage = decorators.deferrable(function (ret, pkg, from_address, to_address, quote) {
+    this._api.get_label_by_package(pkg, from_address, to_address, quote)
+        .done(function (result) {
+            if (!result || !result.label) {
+                ret.reject(result, "Unable to generate label!");
+            } else {
+                ret.resolve(result);
+            }
+        });
+});
+
 
 /**
  * Sends data of the specified format to the printer proxy.

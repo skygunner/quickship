@@ -11,7 +11,7 @@ namespace.View = function () {
     this._setupProperties();
 
     // Set up InputPrompt objects.
-    $("#sale_order,.participant input,input#box_code").inputPrompt();
+    $("#sale_order,.participant input,input#box_code,.subform input").inputPrompt();
 
     // Lock the box dimensions inputs if the box code is locked as well.
     $("#box_dimensions input").inputPrompt({
@@ -52,6 +52,7 @@ namespace.View.prototype.reset = function () {
  */
 namespace.View.prototype.resetPackageUI = function () {
     this.clear();
+    this.hideManualEntry();
     this.$picker.focus();
 };
 
@@ -161,6 +162,24 @@ namespace.View.prototype.getPackageCode = function () {
 };
 
 /**
+ * Returns a JSON object representing a package suitable for passing to the server.
+ *
+ * @returns {{...}}
+ */
+namespace.View.prototype.getPackage = function () {
+    var dimensions = this.getDimensions();
+    return {
+        'scale': this.getWeight(),
+        'length': dimensions.length,
+        'width': dimensions.width,
+        'height': dimensions.height,
+        'picker_id': this.getPicker(),
+        'packer_id': this.getPacker(),
+        'shipper_id': this.getShipper()
+    };
+}
+
+/**
  * Sets the current box dimensions.
  *
  * @param dimensions
@@ -183,6 +202,18 @@ namespace.View.prototype.getDimensions = function () {
         height: parseFloat(this.box.$height.val())
     };
 };
+
+namespace.View.prototype.getFromAddress = function () {
+    var address = {};
+    this.$from_address.find("input").each(function (i, elem) { address[this.name] = this.value});
+    return address;
+}
+
+namespace.View.prototype.getToAddress = function () {
+    var address = {};
+    this.$to_address.find("input").each(function (i, elem) { address[this.name] = this.value});
+    return address;
+}
 
 namespace.View.prototype.elementByField = function (field_name) {
     switch (field_name) {
@@ -244,6 +275,29 @@ namespace.View.prototype.showQuotes = function (quotes) {
 };
 
 /**
+ * Show address entry for manual shipping actions.
+ */
+namespace.View.prototype.showManualEntry = function () {
+    this.$manual_entry.show().find("input").val('');
+}
+
+/**
+ * Hide address entry for manual shipping actions.
+ */
+namespace.View.prototype.hideManualEntry = function () {
+    this.$manual_entry.hide();
+};
+
+/**
+ * Return `true` if we are currently in "manual mode."
+ *
+ * @returns {*}
+ */
+namespace.View.prototype.manualMode = function () {
+    return this.$manual_entry.is(":visible");
+}
+
+/**
  * Returns true if quotes list is visible.
  *
  * @returns {*}
@@ -292,4 +346,7 @@ namespace.View.prototype._setupProperties = function () {
     this.$step1_inputs = $("#quickship_kiosk #step-1 input:not(#box_code)");
     this.$no_library_mail = $("#no_library_mail");
     this.$autoprint = $("#autoprint");
+    this.$manual_entry = $("#manual_entry");
+    this.$from_address = $("#from_address");
+    this.$to_address = $("#to_address");
 };

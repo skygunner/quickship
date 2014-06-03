@@ -17,54 +17,117 @@
             </div>
         </div>
 
-        <p>
+        <div id="sale_order_container">
             <h2>
                 <label for="sale_order">Sale ID:</label>
                 <input id="sale_order"></input>
             </h2>
-        </p>
-        <p>
-            <h2 id="scale">
-                <label for="weight">Weight:</label>
-                <span id="weight">0.00</span>
-                <input id="weight_value" type="hidden"></input>
-                <input id="weight_unit" type="hidden"></input>
-            </h2>
-        </p>
-        <p>
-            <h2>
-                <label for="box_code">Box Code:</label>
-                <input id="box_code"></input>
-            </h2>
-            <h4>
-                <label for="box_dimensions">Dimensions:</label>
-                <span id="box_dimensions">
-                    <input id="box_length" maxlength="2" placeholder="L"></input>
-                    x <input id="box_width" maxlength="2" placeholder="W"></input>
-                    x <input id="box_height" maxlength="2" placeholder="H"></input>
-                </span>
-            </h4>
-        </p>
-        <p>
-            <input type="checkbox" id="autoprint" name="autoprint" value="1"/>
-            <label for="autoprint">Automatically buy and print the cheapest label.</label>
-        </p>
-        <p>
-            <input type="checkbox" id="no_library_mail" name="no_library_mail" value="1" checked="checked" />
-            <label for="no_library_mail">Exclude "Library Mail."</label>
-        </p>
+        </div>
+        <div class="left">
+            <div id="manual_entry">
+                <div id="from_address" class="subform">
+                    <h2>From Address</h2>
+                    <h4>
+                        <label for="from_name">Name:</label>
+                        <input id="from_name" class="name" name="name"></input>
+                    </h4>
+                    <h4>
+                        <label for="from_street">Address (line 1):</label>
+                        <input id="from_street" class="street" name="street"></input>
+                    </h4>
+                    <h4>
+                        <label for="from_street2">Address (line 2):</label>
+                        <input id="from_street2" class="street2 optional" name="street2"></input>
+                    </h4>
+                    <h4>
+                        <label for="from_city">City:</label>
+                        <input id="from_city" class="city" name="city"></input>
+                    </h4>
+                    <h4>
+                        <label for="from_state">State/Province:</label>
+                        <input id="from_state" class="state" name="state" maxlength="2"></input>
+                    </h4>
+                    <h4>
+                        <label for="from_zip">Zip Code:</label>
+                        <input id="from_zip" class="zip" name="zip"></input>
+                    </h4>
+                    <h4>
+                        <label for="from_country">Country Code:</label>
+                        <input id="from_country" class="country" name="country"></input>
+                    </h4>
+                </div>
+                <div id="to_address" class="subform">
+                    <h2>To Address</h2>
+                    <h4>
+                        <label for="to_name">Name:</label>
+                        <input id="to_name" class="name" name="name"></input>
+                    </h4>
+                    <h4>
+                        <label for="to_street">Address (line 1):</label>
+                        <input id="to_street" class="street" name="street"></input>
+                    </h4>
+                    <h4>
+                        <label for="to_street2">Address (line 2):</label>
+                        <input id="to_street2" class="street2 optional" name="street2"></input>
+                    </h4>
+                    <h4>
+                        <label for="to_city">City:</label>
+                        <input id="to_city" class="city" name="city"></input>
+                    </h4>
+                    <h4>
+                        <label for="to_state">State/Province:</label>
+                        <input id="to_state" class="state" name="state" maxlength="2"></input>
+                    </h4>
+                    <h4>
+                        <label for="to_zip">Zip Code:</label>
+                        <input id="to_zip" class="zip" name="zip"></input>
+                    </h4>
+                    <h4>
+                        <label for="to_country">Country Code:</label>
+                        <input id="to_country" class="country" name="country"></input>
+                    </h4>
+                </div>
+            </div>
+            <p>
+                <h2 id="scale">
+                    <label for="weight">Weight:</label>
+                    <span id="weight">0.00</span>
+                    <input id="weight_value" type="hidden"></input>
+                    <input id="weight_unit" type="hidden"></input>
+                </h2>
+            </p>
+            <p>
+                <h2>
+                    <label for="box_code">Box Code:</label>
+                    <input id="box_code"></input>
+                </h2>
+                <h4>
+                    <label for="box_dimensions">Dimensions:</label>
+                    <span id="box_dimensions">
+                        <input id="box_length" maxlength="2" placeholder="L"></input>
+                        x <input id="box_width" maxlength="2" placeholder="W"></input>
+                        x <input id="box_height" maxlength="2" placeholder="H"></input>
+                    </span>
+                </h4>
+            </p>
+            <p>
+                <input type="checkbox" id="autoprint" name="autoprint" value="1"/>
+                <label for="autoprint">Automatically buy and print the cheapest label.</label>
+            </p>
+            <p>
+                <input type="checkbox" id="no_library_mail" name="no_library_mail" value="1" checked="checked" />
+                <label for="no_library_mail">Exclude "Library Mail."</label>
+            </p>
+        </div>
+
     </div>
     <div id="step-2">
-        <p id="shipping_quotes">
-            <h2>Select a label to print:</h2>
-            <ol id="quotes_list"></ol>
-            <input id="quote_selected"></input>
-        </p>
-        <p>
-            <button id="quote_okay">Okay</button>
-            <button id="quote_cancel">Cancel</button>
-        </p>
-    </div>
+                <h2>Select a label to print:</h2>
+                <ol id="quotes_list"></ol>
+                <input id="quote_selected"></input>
+                <button id="quote_okay">Okay</button>
+                <button id="quote_cancel">Cancel</button>
+        </div>
     <div id="postageBalance">
         <p>USPS Postage Remaining: <span id="uspsBalance"></span></p>
     </div>

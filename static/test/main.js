@@ -3,7 +3,7 @@ openerp.testing.section('integration smoke test', function (test){
         var ret = new $.Deferred();
         var api = new instance.quickship.API();
 
-        api.get_quotes(1, true).done(function(result) {
+        api.get_quotes({}, 1, null, null, true).done(function(result) { // getQuotes with only a sale ID
             ok(result.quotes.length > 0, "server returned without error");
             ret.resolve(result);
         }).fail(function(error) {

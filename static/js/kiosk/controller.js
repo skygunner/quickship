@@ -86,13 +86,42 @@ namespace.Controller.prototype.initShipperID = function () {
 }
 
 /**
+ * Creates an object server-side representing the package currently being processed
+ * (if appropriate) and then prints the label selected.
+ *
+ * @param list_selection
+ */
+namespace.Controller.prototype.createAndPrint = function (list_selection) {
+    var that = this;
+
+    if (!that.view.manualMode()) {
+        that.model
+            .getSaleOrderID(that.view.getSaleOrder())
+            .done(function (sale_id) {
+                that.model
+                    .createPackage(that.view.getPackage(), sale_id)
+                    .done(function (res) {
+                        if (!res.success) {
+                            that.options.message.error("Failed to create package server-side.")
+                        } else {
+                            that.printLabel(list_selection, res.id);
+                        }
+                    });
+            });
+    } else {
+        that.printLabel(list_selection);
+    }
+};
+
+/**
  * Takes a number corresponding to the position of a label in the list of
  * quotes and prints the label. 1-indexed, to match the UI numbering.
  *
  * @param list_selection
  */
-namespace.Controller.prototype.printLabel = function (list_selection) {
+namespace.Controller.prototype.printLabel = function (list_selection, package_id) {
     var that = this;
+
     if (isNaN(parseInt(list_selection)) || !isFinite(list_selection)) {
         that.options.message.error("'" + list_selection + "' is not a valid number.");
         return;
@@ -107,19 +136,31 @@ namespace.Controller.prototype.printLabel = function (list_selection) {
     }
 
     // If we got here, we have a valid quote. Print its label!
-    that.model
-        .getLabel(that.model.getPackageID(), quote)
-        .done(function (result) {
-            if (result.errors) {
-                that.options.logger.error(result);
-                that.options.message.error("Could not get label! Check logger for details.")
-            } else {
-                if (quote.company == "USPS") {
-                    that.view.updateUspsBalance(result.postage_balance);
-                }
-                that.model.print("EPL2", result.label);
+    var label_request = null;
+
+    // Determine how to generate the label. From a pre-created package
+    // or from a manual entry?
+    if (!package_id) {
+        label_request = that.model.getLabelByPackage(
+            that.view.getPackage(), that.view.getFromAddress(), that.view.getToAddress(), quote
+        );
+    } else {
+        label_request = that.model.getLabelByPackageID(package_id, quote);
+    }
+
+    // However we generated the label, we want to print it when we're done!
+    label_request.done(function (result) {
+        if (result.errors) {
+            that.options.logger.error(result);
+            that.options.message.error("Could not get label! Check logger for details.")
+        } else {
+            if (quote.company == "USPS") {
+                that.view.updateUspsBalance(result.postage_balance);
             }
-        });
+
+            that.model.print("EPL2", result.label);
+        }
+    });
 
     // Clear the widget's state.
     that.model.reset();
@@ -132,6 +173,31 @@ namespace.Controller.prototype.printLabel = function (list_selection) {
 namespace.Controller.prototype.preloadPackageDimensions = function () {
     this.model.getPackageDimensions();
 }
+
+namespace.Controller.prototype.getQuotes = function (pkg, sale_id, from_address, to_address, includeLibraryMail) {
+    var that = this;
+
+    that.model
+        .getQuotes(pkg, sale_id, from_address, to_address, includeLibraryMail)
+        .done(function (quotes) {
+            // Auto-select the cheapest quote if requested.
+            if (that.view.autoprint()) {
+                that.createAndPrint(1);
+
+           // Otherwise display the quotes for the user to select.
+           } else {
+               that.view.showQuotes(quotes);
+           }
+        })
+        .fail(function (response) {
+            that.options.logger.error(response);
+            that.options.message.error(response.error);
+
+            if (response.field) {
+                that.view.elementByField(response.field).val('').focus();
+            }
+        });
+};
 
 /**
  * Takes an options object, fills in its omitted fields with defaults, and returns it.
@@ -249,7 +315,7 @@ namespace.Controller.prototype._setupSelectedQuoteOkayButton = function () {
     var that = this;
 
     that.view.$quote_okay.on("click", function () {
-        that.printLabel(that.view.$quote_input.val());
+        that.createAndPrint(that.view.$quote_input.val());
     });
 };
 
@@ -299,8 +365,16 @@ namespace.Controller.prototype._setupSaleOrderChangeEvent = function () {
     var that = this;
 
     that.view.$sale_order.on("change", function () {
+        var sale_order_code = that.view.getSaleOrder();
+
+        if (sale_order_code.toLowerCase() == "m") { // Manual shipping entry.
+            that.view.showManualEntry();
+            return;
+        }
+        that.view.hideManualEntry();
+
         that.model
-            .getSaleOrderID(that.view.getSaleOrder())
+            .getSaleOrderID(sale_order_code)
             .fail(function () {
                 that.view.$sale_order.val('').focus();
                 that.options.message.error("Invalid sale order!")
@@ -318,44 +392,26 @@ namespace.Controller.prototype._setupInputCompleteEvent = function () {
     var that = this;
 
     that.view.$step1_inputs.on("change", function (e) {
-        var emptyInputs = that.view.$step1_inputs.filter(function () { return !this.value; });
+        var emptyInputs = that.view.$step1_inputs.filter(function () {
+            var $this = $(this);
+            return !this.value && ($this.is(":visible") || this.type == "hidden") && !($this.hasClass('optional'));
+        });
 
-        if (!that.view.showingQuotes() && emptyInputs.length == 0) {
-            var includeLibraryMail = that.view.includeLibraryMail();
-            var dimensions = that.view.getDimensions();
-            var pkg = {
-                'scale': that.view.getWeight(),
-                'length': dimensions.length,
-                'width': dimensions.width,
-                'height': dimensions.height,
-                'picker_id': that.view.getPicker(),
-                'packer_id': that.view.getPacker(),
-                'shipper_id': that.view.getShipper()
-            };
+        if (that.view.showingQuotes() || emptyInputs.length > 0) {
+            return;
+        }
 
+        var sale_order = that.view.getSaleOrder();
+        var includeLibraryMail = that.view.includeLibraryMail();
+        var pkg = that.view.getPackage();
+
+        if (sale_order.toLowerCase() == "m") {
+            that.getQuotes(pkg, null, that.view.getFromAddress(), that.view.getToAddress(), includeLibraryMail);
+        } else {
             that.model
-                .getSaleOrderID(that.view.getSaleOrder())
+                .getSaleOrderID(sale_order) // Function caches sale order IDs, so no efficiency worries!
                 .done(function (sale_id) {
-                    that.model
-                        .getQuotes(sale_id, pkg, includeLibraryMail)
-                        .done(function (quotes) {
-                            // Auto-select the cheapest quote if requested.
-                            if (that.view.autoprint()) {
-                                that.printLabel(1);
-
-                           // Otherwise display the quotes for the user to select.
-                           } else {
-                               that.view.showQuotes(quotes);
-                           }
-                        })
-                        .fail(function (response) {
-                            that.options.logger.error(response);
-                            that.options.message.error(response.error);
-
-                            if (response.field) {
-                                that.view.elementByField(response.field).val('').focus();
-                            }
-                        });
+                    that.getQuotes(pkg, sale_id, null, null, includeLibraryMail);
                 })
         }
     });

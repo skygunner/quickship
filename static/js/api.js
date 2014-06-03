@@ -45,34 +45,58 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         },
 
         // Convenience function for creating a new package.
-        create_package: function (sale_order, pkg, picker, packer, shipper) {
-            return this.packages.call("create_package", {
-                "sale_order": sale_order,
-                "package": pkg,
-                "picker_id": picker,
-                "packer_id": packer,
-                "shipper_id": shipper
-            });
+        create_package: function (pkg, sale_order) {
+            return this.packages.call("create_package", [pkg, sale_order]);
         },
 
         // Convenience function for getting quotes for a package.
-        get_quotes: function (sale_id, pkg, test) {
+        get_quotes: function (pkg, sale_id, from_address, to_address, test) {
             var kwargs = {};
 
-            if (test !== undefined) {
-                kwargs['test'] = test;
+            if (sale_id) {
+                kwargs.sale_id = sale_id;
             }
-            return this.packages.call('get_quotes', [sale_id, pkg], kwargs);
+
+            if (from_address) {
+                kwargs.from_address = from_address;
+            }
+
+            if (to_address) {
+                kwargs.to_address = to_address;
+            }
+
+            if (test !== undefined) {
+                kwargs.test = test;
+            }
+            return this.packages.call('get_quotes', [pkg], kwargs);
         },
 
         // Convenience function for getting the label for a package.
-        get_label: function (package_id, shipping, test) {
-            var params = {"shipping": shipping};
+        get_label_by_package_id: function (package_id, shipping, test) {
+            var params = {
+                "shipping": shipping,
+                "package_id": package_id
+            };
 
             if (test !== undefined) {
                 params['test'] = test;
             }
-            return this.packages.call('get_label', [package_id], params);
+            return this.packages.call('get_label', [], params);
+        },
+
+        get_label_by_package: function (pkg, from_address, to_address, shipping, test) {
+            var params = {
+                "shipping": shipping,
+                "package": pkg,
+                "from_address": from_address,
+                "to_address": to_address
+            };
+
+            if (test !== undefined) {
+                params['test'] = test;
+            }
+
+            return this.packages.call('get_label', [], params);
         },
 
         // Convenience function for getting stats.
