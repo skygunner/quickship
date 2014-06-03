@@ -19,7 +19,7 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>
 ##############################################################################
 
-import base64
+import base64, urllib2
 from collections import namedtuple
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
@@ -27,6 +27,7 @@ from decimal import Decimal
 from ..shipping_api_usps.api import v1 as usps_api
 
 PackageWrapper = namedtuple("PackageWrapper", ['weight', 'length', 'width', 'height'])
+AddressWrapper = namedtuple("AddressWrapper", ['name', 'street', 'street2', 'city', 'state', 'zip', 'country'])
 
 class stock_packages(osv.osv):
 
@@ -44,19 +45,51 @@ class stock_packages(osv.osv):
         'created': fields.datetime.now
     }
     
-    def get_label(self, cr, uid, package_id, shipping=None, test=None, context=None):
+    def get_label(self, cr, uid, package=None, package_id=None, from_address=None,
+                  to_address=None, shipping=None, test=None, context=None):
         '''Returns a base64-encoded EPL2 label'''
 
         # Return immediately if we're just checking endpoints.
         if test:
             return {'label': base64.b64encode("dummy label data")}
 
-        package = self.pool.get("stock.packages").browse(cr, uid, package_id)
+        if not package and not package_id:
+            return {"error": "Cannot create label without a package!"}
+
+        elif package:
+            if package['scale']['unit'] == "kilogram":
+                package['scale']['weight'] = float(Decimal(package['scale']['weight']) * Decimal("2.2046"))
+                package['scale']['unit'] = "pound"
+
+            package = PackageWrapper(package["scale"]["weight"], package["length"], package["width"], package["height"])
+            picking = None
+
+        elif package_id:
+            package = self.pool.get("stock.packages").browse(cr, uid, package_id)
+            picking = package.pick_id
+
+
+        if from_address:
+            from_address = AddressWrapper(
+                from_address['name'], from_address['street'], from_address['street2'],
+                from_address['city'], from_address['state'], from_address['zip'], from_address['country']
+            )
+
+        if to_address:
+            to_address = AddressWrapper(
+                to_address['name'], to_address['street'], to_address['street2'],
+                to_address['city'], to_address['state'], to_address['zip'], to_address['country']
+            )
 
         if shipping["company"] == "USPS":
-            usps_config = usps_api.get_config(cr, uid, sale=package.pick_id.sale_id, context=context)
+            if picking:
+                usps_config = usps_api.get_config(cr, uid, sale=picking.sale_id, context=context)
+            else:
+                usps_config = usps_api.get_config(cr, uid, context=context)
+                
             label = usps_api.get_label(
-                usps_config, package.pick_id, package, service=shipping["service"].replace(" ", "")
+                usps_config, package, shipping["service"].replace(" ", ""),
+                picking=picking, from_address=from_address, to_address=to_address, test=test
             )
 
         elif shipping["company"] == "UPS":
@@ -70,18 +103,8 @@ class stock_packages(osv.osv):
             'postage_balance': label.postage_balance
         }
 
-    def get_quotes(self, cr, uid, sale_id, pkg, test=None, context=None):
+    def get_quotes(self, cr, uid, pkg, sale_id=None, from_address=None, to_address=None, test=None, context=None):
         '''Returns a list of all shipping options'''
-
-        # Convert kilograms to pounds?
-        if pkg['scale']['unit'] == "kilogram":
-            pkg['scale']['weight'] = float(Decimal(pkg['scale']['weight']) * Decimal("2.2046"))
-            pkg['scale']['unit'] = "pound"
-
-        # Wrap our package dictionary so we can pass it safely to the USPS API.
-        pkg = PackageWrapper(
-            weight=pkg["scale"]["weight"], length=pkg["length"], width=pkg["width"], height=pkg["height"]
-        )
 
         # Return immediately if we're just checking endpoints.
         if test:
@@ -93,16 +116,52 @@ class stock_packages(osv.osv):
                 }]
             }
 
-        sale = self.pool.get("sale.order").browse(cr, uid, sale_id)
-        usps_config = usps_api.get_config(cr, uid, sale=sale, context=context)
+        # Convert kilograms to pounds?
+        if pkg['scale']['unit'] == "kilogram":
+            pkg['scale']['weight'] = float(Decimal(pkg['scale']['weight']) * Decimal("2.2046"))
+            pkg['scale']['unit'] = "pound"
 
-        return {
-            'quotes': sorted([
-                quote for quote in usps_api.get_quotes(usps_config, sale, pkg, test=test)
-            ], key=lambda x: x["price"]) #+ [
-#                quote for quote in rates.ups_quotes(sale_obj, weight_lbs, test_mode=test)
-#            ]
-        }
+        # Wrap our package dictionary so we can pass it safely to the USPS API.
+        pkg = PackageWrapper(
+            weight=pkg["scale"]["weight"], length=pkg["length"], width=pkg["width"], height=pkg["height"]
+        )
+
+        # Now what were we passed for purposes of finding an address?
+        if sale_id:
+            sale = self.pool.get("sale.order").browse(cr, uid, sale_id)
+            usps_config = usps_api.get_config(cr, uid, sale=sale, context=context)
+        else:
+            sale = None
+            usps_config = usps_api.get_config(cr, uid, context=context)
+
+        if from_address:
+            from_address = AddressWrapper(
+                from_address['name'], from_address['street'], from_address['street2'],
+                from_address['city'], from_address['state'], from_address['zip'], from_address['country']
+            )
+            
+        if to_address:
+            to_address = AddressWrapper(
+                to_address['name'], to_address['street'], to_address['street2'],
+                to_address['city'], to_address['state'], to_address['zip'], to_address['country']
+            )
+
+        try:
+            return {
+                'quotes': sorted([
+                    quote for quote in usps_api.get_quotes(
+                        usps_config, pkg, sale=sale,from_address=from_address, to_address=to_address, test=test
+                    )
+                ], key=lambda x: x["price"]) #+ [
+    #                quote for quote in rates.ups_quotes(sale_obj, weight_lbs, test_mode=test)
+    #            ]
+            }
+        except urllib2.URLError:
+            return {
+                "success": False,
+                "error": "Could not connect to Endicia!"
+            }
+
 
     def get_stats(self, cr, uid, fromDate, toDate, test=False):
         """Return a dictionary of pickers and packers."""
