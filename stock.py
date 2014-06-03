@@ -148,7 +148,7 @@ class stock_packages(osv.osv):
             ], key=lambda u: u['package_count'], reverse=True)
         }
 
-    def create_package(self, cr, uid, sale_order=None, package=None, test=False):
+    def create_package(self, cr, uid, package, sale_order_id, test=False):
         '''Creates a package and adds it to the sale order's delivery order'''
 
         # Return immediately if we're just checking endpoints.
@@ -156,15 +156,6 @@ class stock_packages(osv.osv):
             return {"id": 1, "success": True}
 
         sale_order_pool = self.pool.get("sale.order")
-        sale_order_id = sale_order_pool.search(cr, uid, [('name','=',sale_order)], limit=1)
-
-        # Return an error if we couldn't find a sale order by the given name,
-        if not sale_order_id:
-            return {"success": False, "error": _("Could not find sale order \"") + sale_order + "\""}
-
-        if isinstance(sale_order_id, (list, tuple)):
-            sale_order_id = sale_order_id[0]
-
         sale_order_obj = sale_order_pool.browse(cr, uid, sale_order_id)
 
         if not sale_order_obj.picking_ids:
