@@ -30,7 +30,8 @@
     'data': [
         'quickship.xml',
         'security/groups.xml',
-        'res_users_view.xml'
+        'res_users_view.xml',
+        'company_view.xml'
     ],
     'init_xml': [
         'data/shipping.package.type.xml'

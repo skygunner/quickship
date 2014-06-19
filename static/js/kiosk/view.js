@@ -11,7 +11,7 @@ namespace.View = function () {
     this._setupProperties();
 
     // Set up InputPrompt objects.
-    $("#sale_order,.participant input,input#box_code,.subform input").inputPrompt();
+    $("#sale_order,.participant input,input#box_code, input#num_packages, .subform input").inputPrompt();
 
     // Lock the box dimensions inputs if the box code is locked as well.
     $("#box_dimensions input").inputPrompt({
@@ -162,13 +162,31 @@ namespace.View.prototype.getPackageCode = function () {
 };
 
 /**
+ * Returns the number of packages entered.
+ *
+ * @returns {String}
+ */
+namespace.View.prototype.getNumPackages = function () {
+    return this.$num_packages.val();
+};
+
+/**
+ * Returns the package value entered.
+ *
+ * @returns {String}
+ */
+namespace.View.prototype.getPackageValue = function () {
+    return this.$package_value.val();
+};
+
+/**
  * Returns a JSON object representing a package suitable for passing to the server.
  *
  * @returns {{...}}
  */
 namespace.View.prototype.getPackage = function () {
     var dimensions = this.getDimensions();
-    return {
+    var pkg = {
         'scale': this.getWeight(),
         'length': dimensions.length,
         'width': dimensions.width,
@@ -177,7 +195,35 @@ namespace.View.prototype.getPackage = function () {
         'packer_id': this.getPacker(),
         'shipper_id': this.getShipper()
     };
+
+    if (this.$manual_customs.is(":visible")) {
+        pkg['value'] = this.getPackageValue();
+    }
+
+    return pkg;
 }
+
+/**
+ * Grabs all the customs-related fields and returns a JSON object suitable for passing to the server.
+ *
+ * @returns {{*}}
+ */
+namespace.View.prototype.getCustoms = function () {
+    if (!this.$manual_customs.is(":visible")) {
+        return null;
+    }
+
+    return {
+        "contents_type": this.manual_customs.$contents_type.val(),
+        "signature": this.manual_customs.$signature.val(),
+        "items": [
+            {
+               "description": this.manual_customs.$description.val(),
+               "value": this.manual_customs.$value.val()
+            }
+        ]
+    };
+};
 
 /**
  * Sets the current box dimensions.
@@ -203,18 +249,33 @@ namespace.View.prototype.getDimensions = function () {
     };
 };
 
+/**
+ * Get a JSON object representing the manually entered "from" address.
+ *
+ * @returns {{}}
+ */
 namespace.View.prototype.getFromAddress = function () {
     var address = {};
-    this.$from_address.find("input").each(function (i, elem) { address[this.name] = this.value});
+    this.$from_address.find("input:visible").each(function (i, elem) { address[this.name] = this.value });
     return address;
 }
 
+/**
+ * Get a JSON object representing the manually entered "to" address.
+ * @returns {{}}
+ */
 namespace.View.prototype.getToAddress = function () {
     var address = {};
-    this.$to_address.find("input").each(function (i, elem) { address[this.name] = this.value});
+    this.$to_address.find("input:visible").each(function (i, elem) { address[this.name] = this.value });
     return address;
 }
 
+/**
+ * Get an element by its field name.
+ *
+ * @param field_name
+ * @returns {*|jQuery|HTMLElement}
+ */
 namespace.View.prototype.elementByField = function (field_name) {
     switch (field_name) {
 
@@ -278,6 +339,8 @@ namespace.View.prototype.showQuotes = function (quotes) {
  * Show address entry for manual shipping actions.
  */
 namespace.View.prototype.showManualEntry = function () {
+    this.$num_packages.parent().hide();
+    this.$num_packages.val('');
     this.$manual_entry.show().find("input").val('');
 }
 
@@ -285,6 +348,7 @@ namespace.View.prototype.showManualEntry = function () {
  * Hide address entry for manual shipping actions.
  */
 namespace.View.prototype.hideManualEntry = function () {
+    this.$num_packages.parent().show();
     this.$manual_entry.hide();
 };
 
@@ -336,6 +400,7 @@ namespace.View.prototype._setupProperties = function () {
         $width: $("#box_width"),
         $height: $("#box_height")
     };
+    this.$num_packages = $("#num_packages");
     this.$step2 = $("#step-2");
     this.$quotes = $("#quotes_list");
     this.$quote_input = $("#quote_selected");
@@ -347,6 +412,16 @@ namespace.View.prototype._setupProperties = function () {
     this.$no_library_mail = $("#no_library_mail");
     this.$autoprint = $("#autoprint");
     this.$manual_entry = $("#manual_entry");
-    this.$from_address = $("#from_address");
+    this.$from_address = $("#from_address,#from_phone");
     this.$to_address = $("#to_address");
+    this.$from_country = $("#from_country");
+    this.$to_country = $("#to_country");
+    this.$package_value = $("#package_value");
+    this.$manual_customs = $("#manual_customs");
+    this.manual_customs = {
+        $signature: $("#customs_signature"),
+        $contents_type: $("#customs_contents_type"),
+        $description: $("#customs_description"),
+        $value: this.$package_value
+    };
 };

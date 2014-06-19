@@ -1,6 +1,7 @@
 <templates>
 <div t-name="quickship.kiosk" id="quickship_kiosk" class="web_module">
     <h1 id="quickshipHeading">QuickShip Kiosk</h1>
+
     <div id="step-1">
         <div id="participants">
             <div class="participant">
@@ -22,10 +23,14 @@
                 <label for="sale_order">Sale ID:</label>
                 <input id="sale_order"></input>
             </h2>
+            <h4>
+                <label for="num_packages"># Packages:</label>
+                <input id="num_packages"></input>
+            </h4>
         </div>
         <div class="left">
             <div id="manual_entry">
-                <div id="from_address" class="subform">
+                <div id="from_address" class="floating subform">
                     <h2>From Address</h2>
                     <h4>
                         <label for="from_name">Name:</label>
@@ -56,7 +61,7 @@
                         <input id="from_country" class="country" name="country"></input>
                     </h4>
                 </div>
-                <div id="to_address" class="subform">
+                <div id="to_address" class="floating subform">
                     <h2>To Address</h2>
                     <h4>
                         <label for="to_name">Name:</label>
@@ -86,6 +91,36 @@
                         <label for="to_country">Country Code:</label>
                         <input id="to_country" class="country" name="country"></input>
                     </h4>
+                </div>
+                <div class="subform" id="manual_customs">
+                    <h2>
+                        <label for="customs_contents_type">Type:</label>
+                        <select id="customs_contents_type" name="content_type">
+                            <option value="Documents">Documents</option>
+                            <option value="Gift">Gift</option>
+                            <option value="Merchandise" selected="1">Merchandise</option>
+                            <option value="ReturnedGoods">Returned Goods</option>
+                            <option value="Sample">Sample</option>
+                            <option value="HumanitarianDonation">Humanitarian Donation</option>
+                            <option value="DangerousGoods">Dangerous Goods</option>
+                        </select>
+                    </h2>
+                    <h2>
+                        <label for="customs_description">Contents:</label>
+                        <input id="customs_description" name="description" maxlength="47" placeholder="Contents description"></input>
+                    </h2>
+                    <h2>
+                        <label for="package_value">Value:</label>
+                        <input id="package_value" name="package_value" placeholder="$"></input>
+                    </h2>
+                    <h2>
+                        <label for="customs_signature">Signature:</label>
+                        <input id="customs_signature" name="signature" maxlength="47" placeholder="Type your name"></input>
+                    </h2>
+                    <h2>
+                        <label for="from_phone">Phone #:</label>
+                        <input id="from_phone" class="phone" name="phone" placeholder="+1 (000) 000-0000"></input>
+                    </h2>
                 </div>
             </div>
             <p>
@@ -119,8 +154,8 @@
                 <label for="no_library_mail">Exclude "Library Mail."</label>
             </p>
         </div>
-
     </div>
+
     <div id="step-2">
                 <h2>Select a label to print:</h2>
                 <ol id="quotes_list"></ol>

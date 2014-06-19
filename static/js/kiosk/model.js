@@ -7,10 +7,11 @@ var decorators = ryepdx.async.decorators;
  * @param api
  * @constructor
  */
-namespace.Model = function Model (api, printerAPI, scaleAPI) {
+namespace.Model = function Model (api, printerAPI, scaleAPI, actionAPI) {
     this._api = api;
     this._printerAPI = printerAPI;
     this._scaleAPI = scaleAPI;
+    this._actionAPI = actionAPI;
     this._cache = {};
     this.reset();
 };
@@ -45,6 +46,9 @@ namespace.Model.prototype.weigh = decorators.deferrable(function (ret, timeout) 
             } else {
                 ret.resolve(result);
             }
+        })
+        .fail(function (result) {
+            ret.reject(result);
         });
 });
 
@@ -169,11 +173,11 @@ namespace.Model.prototype.getQuotes = decorators.deferrable(
  * @param sale_order
  * @param package
  */
-namespace.Model.prototype.createPackage = decorators.deferrable(function (ret, pkg, sale_id) {
+namespace.Model.prototype.createPackage = decorators.deferrable(function (ret, pkg, sale_id, num_packages) {
     var that = this;
 
     that._api
-        .create_package(pkg, sale_id)
+        .create_package(pkg, sale_id, num_packages)
         .done(function (response) {
            if (response.success) {
                that._pkg_id = response.id;
@@ -184,6 +188,13 @@ namespace.Model.prototype.createPackage = decorators.deferrable(function (ret, p
            }
         });
 });
+
+namespace.Model.prototype.getPackList = function (picking_id) {
+    this._actionAPI.ir_actions_report_xml({
+        "report_name": "stock.picking.list.out", "report_type":"pdf",
+        "context": {"active_ids": [picking_id]}
+    }, { on_close: function () {} });
+}
 
 /**
  * Return a quote in our quotes cache, specified by 0-based index.
@@ -216,8 +227,8 @@ namespace.Model.prototype.getQuote = function (index) {
  * @param callback (optional)
  * @returns undefined || {{*}}
  */
-namespace.Model.prototype.getLabelByPackageID = decorators.deferrable(function (ret, package_id, quote) {
-    this._api.get_label_by_package_id(package_id, quote)
+namespace.Model.prototype.getLabelByPackageID = decorators.deferrable(function (ret, package_id, quote, customs) {
+    this._api.get_label_by_package_id(package_id, quote, customs)
         .done(function (result) {
             if (!result || !result.label) {
                 ret.reject(result, "Unable to generate label!");
@@ -241,8 +252,8 @@ namespace.Model.prototype.getLabelByPackageID = decorators.deferrable(function (
  * @param callback (optional)
  * @returns undefined || {{*}}
  */
-namespace.Model.prototype.getLabelByPackage = decorators.deferrable(function (ret, pkg, from_address, to_address, quote) {
-    this._api.get_label_by_package(pkg, from_address, to_address, quote)
+namespace.Model.prototype.getLabelByPackage = decorators.deferrable(function (ret, pkg, from_address, to_address, quote, customs) {
+    this._api.get_label_by_package(pkg, from_address, to_address, quote, customs)
         .done(function (result) {
             if (!result || !result.label) {
                 ret.reject(result, "Unable to generate label!");

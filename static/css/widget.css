@@ -97,7 +97,7 @@
     color: inherit;
 }
 
-h2 input {
+h2 input, h2 select {
     height: 1.5em;
     font-size: 1em;
     font-weight: bold;
@@ -112,7 +112,7 @@ h2 input {
     margin-top: 0.3em;
 }
 
-#step-1 h2 input, #step-1 h2 span {
+#step-1 h2 input, #step-1 h2 select, #step-1 h2 span {
     margin-left: 6em;
 }
 
@@ -149,8 +149,12 @@ h4 i.foundicon-lock, h4 i.foundicon-unlock {
     margin-top: 0.5em;
 }
 
-h2#scale {
+h2#scale, #manual_customs {
     clear: left;
+}
+
+#manual_customs {
+    display: none;
 }
 
 h2#scale label {
@@ -161,13 +165,13 @@ h2#scale #weight {
     margin-left: 2em;
 }
 
-.subform h2 {
+.floating.subform h2 {
     border-bottom: thin solid black;
 }
 
-.subform {
-    margin: 1em 0px 3em 0px;
+.floating.subform {
     float: left;
+    margin: 1em 0px 3em 0px;
 }
 
 #manual_entry {

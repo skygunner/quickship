@@ -36,6 +36,10 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
             return this.rpc('usps', name, params);
         },
 
+        report: function (name) {
+            return this.rpc()
+        },
+
         // Allows triggers to be set for when particular JSON-RPC function calls are made via 'message.'
         add_notification: function(name, callback){
             if(!this.notifications[name]){
@@ -45,8 +49,11 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         },
 
         // Convenience function for creating a new package.
-        create_package: function (pkg, sale_order) {
-            return this.packages.call("create_package", [pkg, sale_order]);
+        create_package: function (pkg, sale_order, num_packages) {
+            if (!num_packages) {
+                num_packages = 1;
+            }
+            return this.packages.call("create_package", [pkg, sale_order], {"num_packages": num_packages});
         },
 
         // Convenience function for getting quotes for a package.
@@ -72,11 +79,15 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         },
 
         // Convenience function for getting the label for a package.
-        get_label_by_package_id: function (package_id, shipping, test) {
+        get_label_by_package_id: function (package_id, shipping, customs, test) {
             var params = {
                 "shipping": shipping,
                 "package_id": package_id
             };
+
+            if (customs) {
+                params["customs"] = customs;
+            }
 
             if (test !== undefined) {
                 params['test'] = test;
@@ -84,7 +95,7 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
             return this.packages.call('get_label', [], params);
         },
 
-        get_label_by_package: function (pkg, from_address, to_address, shipping, test) {
+        get_label_by_package: function (pkg, from_address, to_address, shipping, customs, test) {
             var params = {
                 "shipping": shipping,
                 "package": pkg,
@@ -92,10 +103,13 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
                 "to_address": to_address
             };
 
+            if (customs) {
+                params["customs"] = customs;
+            }
+
             if (test !== undefined) {
                 params['test'] = test;
             }
-
             return this.packages.call('get_label', [], params);
         },
 

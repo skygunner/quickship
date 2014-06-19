@@ -5,6 +5,7 @@ openerp.quickship = function (instance) {
     instance.quickship._api  = qs.ApiFactory(instance);
     instance.quickship._printerAPI = new instance.printer_proxy.Printer({name: "zebra"});
     instance.quickship._scaleAPI = new instance.scale_proxy.Scale();
+    instance.quickship._actionAPI = new instance.web.ActionManager();
 
     // Client actions
     instance.quickship.create_package = function (parent, action) {
@@ -32,7 +33,8 @@ openerp.quickship = function (instance) {
             // Kick off our model, view, and controller classes.
 
             var model = new qs.kiosk.Model(
-                instance.quickship._api, instance.quickship._printerAPI, instance.quickship._scaleAPI
+                instance.quickship._api, instance.quickship._printerAPI,
+                instance.quickship._scaleAPI, instance.quickship._actionAPI
             );
 
             var view = new qs.kiosk.View();

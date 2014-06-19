@@ -51,6 +51,7 @@ namespace.Controller.prototype.setupEvents = function () {
     that._setupInputCompleteEvent();
     that._setupBoxCodeSelectedEvent();
     that._setupSaleOrderChangeEvent();
+    that._setupCountryCodeChangeEvent();
 };
 
 /**
@@ -99,12 +100,16 @@ namespace.Controller.prototype.createAndPrint = function (list_selection) {
             .getSaleOrderID(that.view.getSaleOrder())
             .done(function (sale_id) {
                 that.model
-                    .createPackage(that.view.getPackage(), sale_id)
+                    .createPackage(that.view.getPackage(), sale_id, that.view.getNumPackages())
                     .done(function (res) {
                         if (!res.success) {
                             that.options.message.error("Failed to create package server-side.")
                         } else {
                             that.printLabel(list_selection, res.id);
+
+                            if (!res.pack_list) {
+                                that.model.getPackList(res.picking_id);
+                            }
                         }
                     });
             });
@@ -142,7 +147,7 @@ namespace.Controller.prototype.printLabel = function (list_selection, package_id
     // or from a manual entry?
     if (!package_id) {
         label_request = that.model.getLabelByPackage(
-            that.view.getPackage(), that.view.getFromAddress(), that.view.getToAddress(), quote
+            that.view.getPackage(), that.view.getFromAddress(), that.view.getToAddress(), quote, that.view.getCustoms()
         );
     } else {
         label_request = that.model.getLabelByPackageID(package_id, quote);
@@ -158,7 +163,24 @@ namespace.Controller.prototype.printLabel = function (list_selection, package_id
                 that.view.updateUspsBalance(result.postage_balance);
             }
 
-            that.model.print("EPL2", result.label);
+            that._retried = that._retried || false;
+            that.model
+                .print(result.format, result.label)
+                .fail(function (xhr) {
+                    if (that._retried) {
+                        return;
+                    }
+                    var httpsWindow, intervalID;
+                    var checkWindow = function () {
+                        if (httpsWindow && httpsWindow.closed) {
+                            clearInterval(intervalID);
+                            that.model.print(result.format, result.label)
+                        }
+                    };
+                    intervalID = setInterval(checkWindow, 500);
+                    httpsWindow = window.open(that.model._printerAPI.url);
+                    that._retried = true;
+                });
         }
     });
 
@@ -242,6 +264,8 @@ namespace.Controller.prototype._parseOptions = function (user_options) {
  */
 namespace.Controller.prototype._pollScale = function () {
     var that = this;
+    that._retried = that._retried || false;
+
     that.model
         .weigh(that.scale_timeout)
         .done(function (reading) {
@@ -258,6 +282,21 @@ namespace.Controller.prototype._pollScale = function () {
             if (parseFloat(inputs.weight) !== parseFloat(reading.weight) || inputs.unit !== reading.unit) {
                 that.view.updateWeight(reading);
             }
+        })
+        .fail(function (xhr, textStatus, errorThrown) {
+            if (that._retried) {
+                return;
+            }
+            var httpsWindow, intervalID;
+            var checkWindow = function () {
+                if (httpsWindow && httpsWindow.closed) {
+                    clearInterval(intervalID);
+                    that._pollScale();
+                }
+            };
+            intervalID = setInterval(checkWindow, 500);
+            httpsWindow = window.open(that.model._scaleAPI.url);
+            that._retried = true;
         });
 };
 
@@ -416,3 +455,25 @@ namespace.Controller.prototype._setupInputCompleteEvent = function () {
         }
     });
 };
+
+/**
+ * Set up an event to hide and show the package value field in manual entry
+ * depending on whether the country codes entered are the same or not.
+ */
+namespace.Controller.prototype._setupCountryCodeChangeEvent = function () {
+    var that = this;
+    var handler = function () {
+        if (that.view.getToAddress().country == "" || that.view.getFromAddress().country == "") {
+            return;
+        }
+
+        if (that.view.getFromAddress().country == that.view.getToAddress().country) {
+            that.view.$manual_customs.hide();
+        } else {
+            that.view.$manual_customs.show();
+        }
+
+    };
+    that.view.$from_country.on("change", handler);
+    that.view.$to_country.on("change", handler);
+}

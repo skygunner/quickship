@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="company_shipping" model="ir.ui.view">
+			<field name="name">res.company.quickship.config</field>
+			<field name="model">res.company</field>
+			<field name="inherit_id" ref="base.view_company_form"/>
+			<field name="arch" type="xml">
+				<page string="Configuration" position="inside">
+					<newline/>
+					<separator string="QuickShip Customs" colspan="4"/>
+					<newline/>
+                    <group colspan="4" col="4">
+                        <field name="customs_form_type" />
+                        <field name="customs_signature" />
+                        <field name="customs_description" />
+                        <field name="customs_contents_type" />
+                        <field name="customs_explanation" attrs="{'invisible': [('customs_contents_type','!=','Other')]}" />
+                        <field name="customs_restriction" />
+                        <field name="customs_restriction_comments"
+                               attrs="{'invisible': ['|',('customs_restriction','=',''),('customs_restriction','=','None')]}" />
+                        <field name="customs_undeliverable" />
+                        <newline />
+                        <field name="customs_eel_pfc" />
+                        <field name="customs_senders_copy" />
+                    </group>
+                    <newline/>
+					<separator string="QuickShip Packing List Text" colspan="4"/>
+					<newline/>
+                    <field name="packing_list_text" />
+				</page>
+			</field>
+		</record>
+
+	</data>
+</openerp>
