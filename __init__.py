@@ -1,6 +1,7 @@
 import stock
 import res_users
 import res_company
+import report
 import math
 from PIL import Image
 from StringIO import StringIO

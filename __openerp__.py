@@ -36,6 +36,9 @@
     'init_xml': [
         'data/shipping.package.type.xml'
     ],
+    "update_xml" : [
+        'stock_packing_list.xml'
+    ],
     'css': ['static/css/widget.css', 'static/css/general_foundicons.css', 'static/css/general_foundicons_ie7.css'],
     'js': [
         'static/js/lib/namespace.js',

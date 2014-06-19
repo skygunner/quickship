@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report auto="False" id="report_stock_packing_list_uniq" model="stock.picking.out" name="stock.picking.list.out"
+                rml="packing_list_report/report/packing_list_report.rml" string="Packing list"
+                usage="default"/>
+
+    </data>
+</openerp>

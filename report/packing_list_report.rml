@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<document filename="packing_list.pdf">
+  <template pageSize="(595.0,842.0)" title="Packing List" author="Ryan Casey" allowSplitting="20">
+    <pageTemplate id="first">
+      <frame id="first" x1="18.0" y1="42.0" width="535" height="785"/>
+        <pageGraphics>
+            <image x="0.8cm" y="25.8cm" height="3.0cm" >[[ company.logo or removeParentNode('image') ]]</image>
+            <setFont name="DejaVu Sans" Align="RIGHT" size="15.0"/>
+			<drawString x="3.5cm" y="28.3cm">[[ company.partner_id.name or '' ]]</drawString>
+			<setFont name="DejaVu Sans" Align="RIGHT" size="8"/>
+			<drawString x="3.5cm" y="27.9cm">[[ company.street or '' ]] [[ company.street2 or '' ]]</drawString>
+			<drawString x="3.5cm" y="27.5cm">[[ company.city ]], [[ company.state_id.code ]] [[ company.zip ]]</drawString>
+			<drawString x="3.5cm" y="27.1cm">[[ company.phone or '' ]]</drawString>
+		</pageGraphics>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Table_Partner_Address">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="OrderDetails">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="ItemTableHeading">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="ItemTableContent">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="footer" fontSize="8.0" alignment="CENTER"/>
+    <paraStyle name="P2" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P3" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P4" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P7" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="P8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="CommentLine" rightIndent="0.0" leftIndent="50.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="5" spaceAfter="5"/>
+    <paraStyle name="P10" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+  </stylesheet>
+  <story>
+    <para style="terp_default_8">[[ repeatIn(objects,'o') ]]</para>
+    <para style="terp_default_8">[[ setLang(o.partner_id.lang) ]]</para>
+    
+    <blockTable colWidths="400.0,150.0" style="Table_Partner_Address">
+      <tr>
+        <td>
+          <para style="P10"></para>
+          <para style="P10"></para>
+        </td>
+        <td alignment="CENTER">
+          <para fontName="Helvetica" fontSize="15.0" leading="19" alignment="CENTER">Packing List</para>
+          <spacer length="0.2cm"/>
+          <barCode ratio="1.2"  barWidth="1.15">[[o.sale_id.name]]</barCode>
+          <spacer length="0.2cm"/>
+          <para style="P10" alignment="CENTER"><b>Order Number:</b> [[o.sale_id.name or '']]</para>
+          <para style="P10" alignment="CENTER"><b>Ship Date:</b> [[get_date(o.date_done)]]</para>
+        </td>
+        
+      </tr>
+    </blockTable>
+    
+	<spacer length="2.5cm"/>
+          
+    <blockTable colWidths="320.0,213.0" style="Table_Partner_Address">
+      <tr>
+        <td>
+          <para style="P10"><b>SOLD TO:</b></para>
+          <para style="terp_default_8">[[ o.partner_id.name or '' ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.street ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.street2 or '' ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.city ]], [[ o.partner_id.state_id.code ]] [[ o.partner_id.zip ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.country_id.name or '' ]]</para>
+        </td>
+        <td>
+          <para style="P10"><b>SHIP TO:</b></para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.name or '' ]]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.street ]]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.street2 or '']]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.city ]], [[ o.sale_id.partner_shipping_id.state_id.code ]] [[ o.sale_id.partner_shipping_id.zip ]]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.country_id.name or '' ]]</para>
+        </td>
+      </tr>
+    </blockTable>
+
+
+	<blockTable colWidths="528.0" style="OrderDetails">
+      <tr>
+        <td>
+          <para style="terp_default_8"></para>
+        </td>
+      </tr>
+	</blockTable>
+
+	<blockTable colWidths="132.0,132.0,132.0,132.0" style="OrderDetails">
+      <tr>
+        <td>
+          <para style="terp_default_8"><b>[[get_ref1(o)]]#:</b> [[get_ref2(o)]]</para>
+        </td>
+        <td>
+          <para style="terp_default_8"><b>Terms:</b> [[o.partner_id.property_payment_term.name]]</para>
+        </td>
+        <td>
+          <para style="terp_default_8"><b>Ship Via:</b> [[o.partner_id.ship_via]]</para>
+        </td>
+        <td>
+          <para style="terp_default_8"><b>Salesperson:</b> [[get_ref(o.origin)]]</para>
+        </td>
+	  </tr>	
+	</blockTable>
+
+    <blockTable colWidths="72.0,162.0,77.0,80.0,67.0,70.0" style="OrderDetails">
+      <tr>
+        <td>
+          <para style="P7">Item Number</para>
+        </td>
+        <td>
+          <para style="P3">Description</para>
+        </td>
+        <td>
+          <para style="P3">Alias Item No:</para>
+        </td>
+        <td>
+          <para style="P4">Ordered</para>
+        </td>
+        <td>
+          <para style="P4">Shipped</para>
+        </td>
+        <td>
+          <para style="P4">Backordered</para>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="CommentLine">[[not o.sale_id.note and removeParentNode('para') ]][[o.sale_id.note]]</para>
+    <section>
+      <para style="terp_default_2">[[ repeatIn([line for line in o.move_lines if (line.state == 'confirmed' or line.state=='done' or line.state=='assigned')],'l') ]]</para>
+      <blockTable colWidths="72.0,162.0,77.0,80.0,67.0,70.0" style="ItemTableContent">
+        <tr>
+          <td>
+            <para style="P8">[[l.product_id.default_code]]</para>
+          </td>
+          <td>
+            <para style="P8">[[l.product_id.name]]</para>
+          </td>
+          <td>
+            <para style="P3">[[ get_alias(o.partner_id, l.product_id)]]</para>
+          </td>
+          <td>
+            <para style="P2">[[ get_qty(l) ]]</para>
+          </td>
+          <td>
+            <para style="P2">[[ get_product_qty(l.product_qty) ]]</para>
+          </td>
+          <td>
+            <para style="P2">[[ str(get_backorder_qty(l)) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+    </section>
+
+    <spacer length="1.5cm"/>
+    <para style="footer">[[company.packing_list_text]]</para>
+    <spacer length="1.5cm"/>
+
+    <para style="terp_default_8" alignment="RIGHT">Packed By:  [[ get_packer_id(o)]]</para>
+  </story>
+</document>
