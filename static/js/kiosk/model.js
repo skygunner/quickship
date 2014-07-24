@@ -193,7 +193,7 @@ namespace.Model.prototype.createPackage = decorators.deferrable(function (ret, p
 
 namespace.Model.prototype.getPackList = function (picking_id) {
     this._actionAPI.ir_actions_report_xml({
-        "report_name": "stock.picking.list.out", "report_type":"pdf",
+        "report_name": "stock.packing.list.out", "report_type":"pdf",
         "context": {"active_ids": [picking_id]}
     }, { on_close: function () {} });
 }
