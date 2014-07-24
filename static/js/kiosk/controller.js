@@ -441,7 +441,7 @@ namespace.Controller.prototype._setupInputCompleteEvent = function () {
             return !this.value && ($this.is(":visible") || this.type == "hidden") && !($this.hasClass('optional'));
         });
 
-        if (that.view.showingQuotes() || emptyInputs.length > 0) {
+        if (that.view.showingQuotes() || emptyInputs.length > 0 || parseFloat(that.view.getWeight().weight) == 0) {
             return;
         }
 
