@@ -21,8 +21,11 @@ class res_users(osv.osv):
         '''Get the user's current account info..'''
         config = usps_api.get_config(cr, uid)
 
+        if test == None:
+            test = config.sandbox if hasattr(config, "sandbox") else config["sandbox"]
+
         try:
-            response = usps_api.get_account_status(config, test=(test if test != None else config.sandbox))
+            response = usps_api.get_account_status(config, test=test)
         except urllib2.URLError:
             response = MockResponse("Could not connect to Endicia!")
 
