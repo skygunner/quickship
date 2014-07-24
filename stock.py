@@ -31,6 +31,7 @@ from quickship import image_to_epl2
 
 AddressWrapper = namedtuple("AddressWrapper", ['name', 'street', 'street2', 'city', 'state', 'zip', 'country', 'phone'])
 _PackageWrapper = namedtuple("PackageWrapper", ['weight_in_ozs', 'length', 'width', 'height', 'value'])
+Label = namedtuple("Label", ["label", "postage_balance"])
 
 class PackageWrapper(_PackageWrapper):
     @property
@@ -186,9 +187,15 @@ class stock_packages(osv.osv):
 
         # If we got something besides EPL2 data, convert it to EPL2 format before sending it client-side.
         if image_format != "EPL2":
-            label.label = image_to_epl2(label.label[0]) # Only interested in the first label right now.
+            label = Label(
+                label=image_to_epl2(label.label[0]), # Only interested in the first label right now.
+                postage_balance=label.postage_balance if hasattr(label, "postage_balance") else label.postage
+            )
         else:
-            label.label = label.label[0]
+            label = Label(
+                label=label.label[0],
+                postage_balance=label.postage_balance if hasattr(label, "postage_balance") else label.postage
+            )
 
         return {
             'label': base64.b64encode(label.label),
