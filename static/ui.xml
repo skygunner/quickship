@@ -110,6 +110,10 @@
                         <input id="customs_description" name="description" maxlength="47" placeholder="Contents description"></input>
                     </h2>
                     <h2>
+                        <label for="customs_commodity_code">Commodity Code:</label>
+                        <input id="customs_commodity_code" name="commodity_code" maxlength="15"></input>
+                    </h2>
+                    <h2>
                         <label for="package_value">Value:</label>
                         <input id="package_value" name="package_value" placeholder="$"></input>
                     </h2>
