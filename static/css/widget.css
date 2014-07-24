@@ -205,3 +205,8 @@ h2#scale #weight {
 #step-2 h2 {
     margin-top: 0.3em;
 }
+
+/* HOTP Customization */
+#no_library_mail, label[for="no_library_mail"] {
+    display: none;
+}
