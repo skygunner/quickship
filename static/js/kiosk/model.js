@@ -117,11 +117,13 @@ namespace.Model.prototype.getSaleOrderID = decorators.deferrable(function (ret, 
 
     if (bypassCache || typeof(that._cache.getSaleOrderID[sale_order_code] == "undefined")) {
         this._api.get_sale_order(sale_order_code).done(function (sale_orders) {
-            if (sale_orders && sale_orders.length > 0) {
+            var sale_order = sale_orders[0];
+
+            if (sale_order) {
                 that._cache.getSaleOrderID[sale_order_code] = sale_orders[0].id;
-                ret.resolve(sale_orders[0].id);
+                ret.resolve(sale_order.id);
             } else {
-                ret.reject(sale_orders);
+                ret.reject(sale_order);
             }
         });
     } else {
