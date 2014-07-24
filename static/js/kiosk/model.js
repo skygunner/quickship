@@ -41,7 +41,7 @@ namespace.Model.prototype.weigh = decorators.deferrable(function (ret, timeout) 
     // "inf" = wait until the scale returns something, no timeouts.
     this._scaleAPI.weigh(timeout)
         .done(function (result) {
-            if (!result || !result.weight || !result.unit) {
+            if (!result || result.weight === undefined || result.unit === undefined) {
                 ret.reject(result, "Unable to get scale reading!");
             } else {
                 ret.resolve(result);
