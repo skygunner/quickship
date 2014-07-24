@@ -232,8 +232,8 @@ namespace.Controller.prototype._parseOptions = function (user_options) {
     var options = user_options || {};
 
     options.scale = $.extend({
-        timeout: 2, // Scale API timeout in seconds.
-        poll_interval: 1 // Minimum time to wait between scale API requests in seconds.
+        timeout: 5, // Scale API timeout in seconds.
+        poll_interval: 2 // Minimum time to wait between scale API requests in seconds.
     }, options.scale);
 
     options.logger = $.extend({
@@ -285,6 +285,11 @@ namespace.Controller.prototype._pollScale = function () {
         })
         .fail(function (xhr, textStatus, errorThrown) {
             if (that._retried) {
+                if (that._scale_polling) {
+                    setTimeout(function () {  // Rate-limit scale polling.
+                        that._pollScale();
+                    }, that.options.scale.poll_interval * 1000);
+                }
                 return;
             }
             var httpsWindow, intervalID;
