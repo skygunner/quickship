@@ -112,16 +112,16 @@
 	<blockTable colWidths="132.0,132.0,132.0,132.0" style="OrderDetails">
       <tr>
         <td>
-          <para style="terp_default_8"><b>[[get_ref1(o)]]#:</b> [[get_ref2(o)]]</para>
+          <para style="terp_default_8"><b>S.O. #:</b> [[o.sale_id.client_order_ref]]</para>
         </td>
         <td>
           <para style="terp_default_8"><b>Terms:</b> [[o.partner_id.property_payment_term.name]]</para>
         </td>
         <td>
-          <para style="terp_default_8"><b>Ship Via:</b> [[o.partner_id.ship_via]]</para>
+          <para style="terp_default_8"><b>Ship Via:</b> [[o.ship_method_id.name]]</para>
         </td>
         <td>
-          <para style="terp_default_8"><b>Salesperson:</b> [[get_ref(o.origin)]]</para>
+          <para style="terp_default_8"><b>Salesperson:</b> TBD</para>
         </td>
 	  </tr>	
 	</blockTable>
