@@ -107,7 +107,7 @@ namespace.Controller.prototype.createAndPrint = function (list_selection) {
                         } else {
                             that.printLabel(list_selection, res.id);
 
-                            if (!res.pack_list) {
+                            if (res.pack_list) {
                                 that.model.getPackList(res.picking_id);
                             }
                         }
