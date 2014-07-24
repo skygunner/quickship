@@ -131,7 +131,7 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         },
 
         get_sale_order: function (code) {
-            return this.sales.query(['id', 'name']).filter([['name', '=', code]]).all();
+            return this.sales.query(['id', 'name', 'invoiced']).filter([['name', '=', code]]).all();
         },
 
         get_quickship_id: function (user_id) {
