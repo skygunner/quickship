@@ -55,6 +55,9 @@ class sale_order(osv.osv):
             'nodestroy': True
         }
 
+sale_order()
+
+
 class stock_packages(osv.osv):
 
     _inherit = 'stock.packages'
@@ -373,5 +376,7 @@ class stock_packages(osv.osv):
             "pack_list": properties["packge_no"] == 1,
             "success": True
         }
+
+stock_packages()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
