@@ -116,4 +116,5 @@ class pack_list(report_sxw.rml_parse):
     def get_product_qty(self, qty):
         return int(qty)
         
-report_sxw.report_sxw('report.stock.picking.list.out', 'stock.picking.out', 'packing_list_report/report/packing_list_report.rml', parser=pack_list, header=False)
+report_sxw.report_sxw('report.stock.packing.list.out', 'stock.picking.out',
+                      'addons/quickship/report/packing_list_report.rml', parser=pack_list, header=False)
