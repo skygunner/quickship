@@ -219,7 +219,8 @@ namespace.View.prototype.getCustoms = function () {
         "items": [
             {
                "description": this.manual_customs.$description.val(),
-               "value": this.manual_customs.$value.val()
+               "value": this.manual_customs.$value.val(),
+               "commodity_code": this.manual_customs.$commodity_code.val()
             }
         ]
     };
@@ -422,6 +423,7 @@ namespace.View.prototype._setupProperties = function () {
         $signature: $("#customs_signature"),
         $contents_type: $("#customs_contents_type"),
         $description: $("#customs_description"),
-        $value: this.$package_value
+        $value: this.$package_value,
+        $commodity_code: $("#customs_commodity_code")
     };
 };
