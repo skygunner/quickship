@@ -25,6 +25,7 @@ from decimal import Decimal
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from shipping_api_ups.api import v1 as ups_api
+from shipping_api_ups.helpers.ups import SERVICES as UPS_SERVICES
 from shipping_api_ups.helpers.shipping import get_country_code
 from shipping_api_usps.api import v1 as usps_api
 from shipping_api_usps.api.v1 import Customs, CustomsItem
@@ -186,7 +187,15 @@ class stock_packages(osv.osv):
                                        test=test, image_format=image_format)
 
         elif shipping["company"] == "UPS":
-            label = {}
+            if picking:
+                ups_config = ups_api.get_config(cr, uid, sale=picking.sale_id, context=context)
+            else:
+                ups_config = ups_api.get_config(cr, uid, context=context)
+
+            services_dict = dict([(name, code) for (code, name) in UPS_SERVICES])
+            label = ups_api.get_label(ups_config, package, services_dict.get(shipping["service"]),
+                                      from_address=from_address, to_address=to_address, customs=customs_obj,
+                                      test=test, image_format=image_format)
 
         else:
             return {"error": "Shipping company '%s' not recognized." % shipping['company']}
@@ -259,10 +268,10 @@ class stock_packages(osv.osv):
                     quote for quote in usps_api.get_quotes(
                         usps_config, pkg, sale=sale,from_address=from_address, to_address=to_address, test=test
                     )
-                #] + [
-                #    quote for quote in ups_api.get_quotes(
-                #        ups_config, pkg, sale=sale,from_address=from_address, to_address=to_address, test=test
-                #    )
+                ] + [
+                    quote for quote in ups_api.get_quotes(
+                        ups_config, pkg, sale=sale,from_address=from_address, to_address=to_address, test=test
+                    )
                 ], key=lambda x: x["price"])
             }
         except urllib2.URLError:
