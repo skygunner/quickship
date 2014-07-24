@@ -25,6 +25,7 @@ from decimal import Decimal
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from shipping_api_ups.api import v1 as ups_api
+from shipping_api_ups.helpers.shipping import get_country_code
 from shipping_api_usps.api import v1 as usps_api
 from shipping_api_usps.api.v1 import Customs, CustomsItem
 from quickship import image_to_epl2
@@ -118,7 +119,7 @@ class stock_packages(osv.osv):
             to_address = AddressWrapper(
                 to_address['name'], to_address['street'], to_address['street2'],
                 to_address['city'], to_address['state'], to_address['zip'], to_address['country'],
-                to_address.get("phone")
+                to_address.get("phone"), is_residence = False
             )
 
          # Get the shipper and recipient addresses if all we have is the picking.
@@ -131,6 +132,7 @@ class stock_packages(osv.osv):
             to_address = picking.sale_id.partner_shipping_id or ''
             to_address.state = to_address.state_id.code
             to_address.country = to_address.country_id.name
+            to_address.is_residence = False
 
         # Grab customs info.
         customs_obj = None
@@ -154,14 +156,15 @@ class stock_packages(osv.osv):
                 description=item.get("description") or company.customs_description,
                 quantity=str(item.get("quantity") or "1"),
                 weight=str(item.get("weight") or package.weight_in_ozs),
-                value=str(item.get("value") or package.value) or (str(package.decl_val) if hasattr(package, "decl_val") else None)
+                value=str(item.get("value") or package.value) or (str(package.decl_val) if hasattr(package, "decl_val") else None),
+                country_of_origin=get_country_code(item.get("country_of_origin") or from_address.country)
             ) for item in customs["items"]]
 
             customs_obj = Customs(
-                form_type=customs.get("form_type") or company.customs_form_type,
                 signature=customs.get("signature") or company.customs_signature,
                 contents_type=customs.get("contents_type") or company.customs_contents_type,
                 contents_explanation=customs.get("explanation") or company.customs_explanation,
+                commodity_code=customs.get("commodity_code") or company.customs_commodity_code,
                 restriction=customs.get("restriction") or company.customs_restriction,
                 restriction_comments=customs.get("restriction_comments") or company.customs_restriction_comments,
                 undeliverable=customs.get("undeliverable") or company.customs_undeliverable,

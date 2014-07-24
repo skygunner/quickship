@@ -15,6 +15,7 @@
                         <field name="customs_signature" />
                         <field name="customs_description" />
                         <field name="customs_contents_type" />
+                        <field name="customs_commodity_code" />
                         <field name="customs_explanation" attrs="{'invisible': [('customs_contents_type','!=','Other')]}" />
                         <field name="customs_restriction" />
                         <field name="customs_restriction_comments"

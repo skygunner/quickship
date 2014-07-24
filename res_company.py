@@ -56,6 +56,7 @@ class res_company(osv.osv):
         'customs_form_type': fields.selection(
             (("Form2976", "Form 2976"), ("Form2976A", "Form 2976A")), "Customs Form Type", required=True
         ),
+        'customs_commodity_code': fields.char('Customs Commodity Code', size=15), # 15 is the field length in the UPS API
         'packing_list_text': fields.text("Packing List Text")
     }
     _defaults = {
@@ -63,6 +64,7 @@ class res_company(osv.osv):
         "customs_contents_type": "Merchandise",
         "customs_restriction": "None",
         "customs_undeliverable": "Return",
+        "customs_commodity_code": "P2522",
         "packing_list_text": "Thank you for your business!"
     }
 
