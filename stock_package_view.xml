@@ -1,0 +1,15 @@
+<openerp>
+    <data>
+        <!--Form view for Ups Stock Package-->
+		<record id="stock_packages_tree_quickship" model="ir.ui.view">
+			<field name="name">stock.packages.tree.quickship</field>
+			<field name="model">stock.packages</field>
+			<field name="inherit_id" ref="shipping_api.stock_packages_tree" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='tracking_no']" position="after">
+					<field name="shipping_company_name" string="Shipping Company" readonly="1" />
+				</xpath>
+			</field>
+		</record>
+    </data>
+</openerp>

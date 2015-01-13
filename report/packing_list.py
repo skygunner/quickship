@@ -27,19 +27,6 @@ class pack_list(report_sxw.rml_parse):
             sale_obj = self.pool.get('stock.picking').browse(cr, uid, delivery_id, context=context)
             sale_browse = self.pool.get('sale.order').browse(cr, uid, [sale_obj.sale_id.id], context=context)[0]
             return sale_browse.user_id.name
-            
-        def get_backorder_qty(line):
-            stock_obj = self.pool.get('stock.picking.out')
-            product_id = line.product_id.id
-            current_pick_id = line.picking_id.id
-            pick_id = stock_obj.search(cr, uid, [('backorder_id', '=', current_pick_id)], context=context)
-            if not pick_id:
-                return 0
-            else:
-                stock_picking_browse = stock_obj.browse(cr, uid, pick_id, context=context)[0]
-                for stock_pick in stock_picking_browse.move_lines:
-                    if product_id == stock_pick.product_id.id:
-                        return int(stock_pick.product_qty)
 
         self.localcontext.update({
             'time': time,
@@ -52,7 +39,6 @@ class pack_list(report_sxw.rml_parse):
             'get_ref1': self.get_ref1,
             'get_ref2': self.get_ref2,
             'get_alias': self.get_alias,
-            'get_backorder_qty': get_backorder_qty, 
             'get_packer_id': self.get_packer_id,
         })
 
@@ -117,4 +103,4 @@ class pack_list(report_sxw.rml_parse):
         return int(qty)
         
 report_sxw.report_sxw('report.stock.packing.list.out', 'stock.picking.out',
-                      'addons/quickship/report/packing_list_report.rml', parser=pack_list, header=False)
+                      'addons/quickship/report/packing_list.rml', parser=pack_list, header=False)

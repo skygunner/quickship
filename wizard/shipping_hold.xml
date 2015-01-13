@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+     <data>
+
+        <!-- "Add Hold" views -->
+        <record id="quickship_shipping_hold_wiz_view" model="ir.ui.view">
+             <field name="name">quickship.shipping_hold.wizard.form</field>
+             <field name="model">quickship.shipping_hold.wizard</field>
+             <field name="arch" type="xml">
+                <form string="Set Shipping Hold" version="7.0">
+                    <group string="Reason for Shipping Hold:">
+                        <field name="shipping_hold_reason" nolabel="1"/>
+                    </group>
+                    <footer>
+                        <button special="cancel" string="Cancel" icon="gtk-cancel"/>
+                        or
+                        <button name="place_hold" type="object" string="Place Hold" icon="gtk-apply"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_shipping_hold_wiz" model="ir.actions.act_window">
+            <field name="name">Shipping Hold Wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">quickship.shipping_hold.wizard</field>
+            <field name="view_id" ref="quickship_shipping_hold_wiz_view"/>
+            <field name="target">new</field>
+        </record>
+
+
+        <!-- "Remove Hold" views -->
+        <record id="quickship_shipping_hold_wiz_remove_view" model="ir.ui.view">
+             <field name="name">quickship.shipping_hold.wizard.remove.form</field>
+             <field name="model">quickship.shipping_hold.wizard</field>
+             <field name="arch" type="xml">
+                <form string="Remove Shipping Hold" version="7.0">
+                    <p>Are you sure you want to remove this shipping hold?</p>
+                    <footer>
+                        <button special="cancel" string="Cancel" icon="gtk-cancel"/>
+                        or
+                        <button name="remove_hold" type="object" string="Remove Hold" icon="gtk-apply"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_shipping_hold_remove_wiz" model="ir.actions.act_window">
+            <field name="name">Shipping Hold Wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">quickship.shipping_hold.wizard</field>
+            <field name="view_id" ref="quickship_shipping_hold_wiz_remove_view"/>
+            <field name="target">new</field>
+        </record>
+	</data>
+</openerp>

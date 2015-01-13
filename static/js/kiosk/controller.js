@@ -104,13 +104,24 @@ namespace.Controller.prototype.createAndPrint = function (list_selection) {
                     .done(function (res) {
                         if (!res.success) {
                             that.options.message.error("Failed to create package server-side.")
-                        } else {
-                            that.printLabel(list_selection, res.id);
+                            return;
+                        }
 
+                        that.printLabel(list_selection, res.id, function () {
                             if (res.pack_list) {
                                 that.model.getPackList(res.picking_id);
                             }
-                        }
+
+                            if (res.last_package) {
+                                that.model.checkInventoryAvailability(res.picking_id)
+                                    .done(function () {
+                                        that.model.setDelivered(sale_id)
+                                            .done(function () {
+                                                that.options.message.notify("Delivery order processed!", "Success");
+                                            })
+                                    });
+                            }
+                        });
                     });
             });
     } else {
@@ -126,10 +137,11 @@ namespace.Controller.prototype.createAndPrint = function (list_selection) {
  */
 namespace.Controller.prototype.printLabel = function (list_selection, package_id) {
     var that = this;
+    var ret = new $.Deferred();
 
     if (isNaN(parseInt(list_selection)) || !isFinite(list_selection)) {
         that.options.message.error("'" + list_selection + "' is not a valid number.");
-        return;
+        return false;
     }
 
     // Attempt to get the selected quote.
@@ -137,7 +149,7 @@ namespace.Controller.prototype.printLabel = function (list_selection, package_id
         var quote = that.model.getQuote(parseInt(list_selection) - 1);
     } catch (err) {
         that.options.message.error(err);
-        return;
+        return false;
     }
 
     // If we got here, we have a valid quote. Print its label!
@@ -155,7 +167,9 @@ namespace.Controller.prototype.printLabel = function (list_selection, package_id
 
     // However we generated the label, we want to print it when we're done!
     label_request.done(function (result) {
-        if (result.errors) {
+        if (result.error) {
+            that.options.message.error(result.error);
+        } else if (result.errors) {
             that.options.logger.error(result);
             that.options.message.error("Could not get label! Check logger for details.")
         } else {
@@ -168,6 +182,7 @@ namespace.Controller.prototype.printLabel = function (list_selection, package_id
                 .print(result.format, result.label)
                 .fail(function (xhr) {
                     if (that._retried) {
+                        that._retried = false;
                         return;
                     }
                     var httpsWindow, intervalID;
@@ -182,11 +197,24 @@ namespace.Controller.prototype.printLabel = function (list_selection, package_id
                     that._retried = true;
                 });
         }
+    }).fail(function (result, message) {
+        if (message) {
+            that.options.message.error(message);
+        } else if ("error" in result) {
+            that.options.message.error(result.error);
+        } else {
+            that.options.message.error("Could not get label! Check logger for details.");
+        }
+        that.options.logger.error(result);
+
+        return false;
     });
 
     // Clear the widget's state.
     that.model.reset();
     that.view.reset();
+
+    return true;
 };
 
 /**
@@ -419,9 +447,9 @@ namespace.Controller.prototype._setupSaleOrderChangeEvent = function () {
 
         that.model
             .getSaleOrderID(sale_order_code)
-            .fail(function () {
+            .fail(function (err) {
                 that.view.$sale_order.val('').focus();
-                that.options.message.error("Invalid sale order!")
+                that.options.message.error(err.message);
             })
     })
 };
@@ -441,13 +469,15 @@ namespace.Controller.prototype._setupInputCompleteEvent = function () {
             return !this.value && ($this.is(":visible") || this.type == "hidden") && !($this.hasClass('optional'));
         });
 
-        if (that.view.showingQuotes() || emptyInputs.length > 0 || parseFloat(that.view.getWeight().weight) == 0) {
+        that.view.resetQuotesUI();
+
+        if (emptyInputs.length > 0 || parseFloat(that.view.getWeight().weight) == 0) {
             return;
         }
 
+        var pkg = that.view.getPackage();
         var sale_order = that.view.getSaleOrder();
         var includeLibraryMail = that.view.includeLibraryMail();
-        var pkg = that.view.getPackage();
 
         if (sale_order.toLowerCase() == "m") {
             that.getQuotes(pkg, null, that.view.getFromAddress(), that.view.getToAddress(), includeLibraryMail);

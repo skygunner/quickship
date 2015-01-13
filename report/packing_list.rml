@@ -4,7 +4,7 @@
     <pageTemplate id="first">
       <frame id="first" x1="18.0" y1="42.0" width="535" height="785"/>
         <pageGraphics>
-            <image x="0.8cm" y="25.8cm" height="3.0cm" >[[ company.logo or removeParentNode('image') ]]</image>
+            <image x="0.8cm" y="28.05cm" width="2.5cm" >[[ company.logo or removeParentNode('image') ]]</image>
             <setFont name="DejaVu Sans" Align="RIGHT" size="15.0"/>
 			<drawString x="3.5cm" y="28.3cm">[[ company.partner_id.name or '' ]]</drawString>
 			<setFont name="DejaVu Sans" Align="RIGHT" size="8"/>
@@ -12,6 +12,12 @@
 			<drawString x="3.5cm" y="27.5cm">[[ company.city ]], [[ company.state_id.code ]] [[ company.zip ]]</drawString>
 			<drawString x="3.5cm" y="27.1cm">[[ company.phone or '' ]]</drawString>
 		</pageGraphics>
+		<pageGraphics>
+        <setFont name="Helvetica" size="8"/>
+        <drawCentredString x="9.5cm" y="0.8cm"><pageNumber/></drawCentredString>
+        <drawCentredString x="10.5cm" y="0.8cm">/</drawCentredString>
+        <drawCentredString x="11.0cm" y="0.8cm"><pageCount/></drawCentredString>
+      </pageGraphics>
     </pageTemplate>
   </template>
   <stylesheet>
@@ -169,7 +175,7 @@
             <para style="P2">[[ get_product_qty(l.product_qty) ]]</para>
           </td>
           <td>
-            <para style="P2">[[ str(get_backorder_qty(l)) ]]</para>
+            <para style="P2">[[ str(l.backorder_qty) ]]</para>
           </td>
         </tr>
       </blockTable>

@@ -26,20 +26,27 @@
     'description': "Fastest possible shipping given a barcode scanner and a scale.",
     'author': 'RyePDX LLC',
     'website': ' http://ryepdx.com',
-    'depends': ['web', 'scale_proxy', 'printer_proxy', 'shipping_api_usps', 'shipping_api_ups', 'stock'],
+    'depends': ['web', 'scale_proxy', 'printer_proxy', 'shipping_api_usps', 'shipping_api_ups', 'shipping_api_fedex', 'stock', 'edi_850_860'],
     'data': [
         'quickship.xml',
         'security/groups.xml',
+        'report/picking_list.xml',
+        'report/packing_list.xml',
         'res_users_view.xml',
-        'company_view.xml'
+        'company_view.xml',
+        'stock_package_view.xml',
+        'wizard/shipping_hold.xml',
+        'res_partner_view.xml',
     ],
     'init_xml': [
         'data/shipping.package.type.xml'
     ],
-    "update_xml" : [
-        'stock_packing_list.xml'
+    'css': [
+        'static/css/widget.css',
+        'static/css/general_foundicons.css',
+        'static/css/general_foundicons_ie7.css',
+        'static/css/shipping_hold.css'
     ],
-    'css': ['static/css/widget.css', 'static/css/general_foundicons.css', 'static/css/general_foundicons_ie7.css'],
     'js': [
         'static/js/lib/namespace.js',
         'static/js/lib/decorators.js',

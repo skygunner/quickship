@@ -2,9 +2,10 @@ openerp.quickship = function (instance) {
     var qs = new Namespace("ryepdx.openerp.quickship");
 
     instance.quickship = {};
-    instance.quickship._api  = qs.ApiFactory(instance);
-    instance.quickship._printerAPI = new instance.printer_proxy.Printer({name: "zebra"});
-    instance.quickship._scaleAPI = new instance.scale_proxy.Scale();
+    instance.quickship._api  = qs.ApiFactory(instance,
+        {'url': window.location.protocol + '//' + window.location.href.split('/')[2]}
+    );
+
     instance.quickship._actionAPI = new instance.web.ActionManager();
 
     // Client actions
@@ -32,22 +33,35 @@ openerp.quickship = function (instance) {
         start: function () {
             // Kick off our model, view, and controller classes.
 
-            var model = new qs.kiosk.Model(
-                instance.quickship._api, instance.quickship._printerAPI,
-                instance.quickship._scaleAPI, instance.quickship._actionAPI
-            );
+            (new instance.web.Model('res.company')).call('get_proxy_settings').done(function (settings) {
+                instance.quickship._printerAPI = new instance.printer_proxy.Printer({
+                    name: "zebra", url: settings.printer.url,
+                    username: settings.printer.username, password: settings.printer.password
+                });
+                instance.quickship._scaleAPI = new instance.scale_proxy.Scale({
+                    url: settings.scale.url, username: settings.scale.username, password: settings.scale.password
+                });
 
-            var view = new qs.kiosk.View();
+                var model = new qs.kiosk.Model(
+                    instance.quickship._api, instance.quickship._printerAPI,
+                    instance.quickship._scaleAPI, instance.quickship._actionAPI
+                );
 
-            var controllerOptions = {
-                message: {
-                    error: function (text) {
-                        instance.web.notification.warn("Error", text);
+                var view = new qs.kiosk.View();
+
+                var controllerOptions = {
+                    message: {
+                        error: function (text) {
+                            instance.web.notification.warn("Error", text, true);
+                        },
+                        notify: function (text, title) {
+                            instance.web.notification.notify(title ? title : "Notice", text);
+                        }
                     }
-                }
-            };
+                };
 
-            var controller = new qs.kiosk.Controller(model, view, controllerOptions);
+                var controller = new qs.kiosk.Controller(model, view, controllerOptions);
+            });
         }
     });
     instance.web.client_actions.add('quickship.Kiosk', 'instance.quickship.Kiosk');

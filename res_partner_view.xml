@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+        <record id="view_partner_form" model="ir.ui.view">
+			<field name="name">view_partner_form</field>
+			<field name="model">res.partner</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="base.view_partner_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='buttons']" position="inside">
+                    <button name="%(action_shipping_hold_wiz)d" string="Place Shipping Hold"
+                            type="action" attrs="{'invisible':[('shipping_hold', '=', True)]}" />
+                </xpath>
+
+                <xpath expr="//div[@name='buttons']" position="after">
+                    <field name="shipping_hold" invisible="1" />
+                    <div class="shipping_hold_message" attrs="{'invisible':[('shipping_hold', '!=', True)]}">
+                        <h3>This account has a shipping hold on it.</h3>
+                        <p>
+                            <label for="shipping_hold_reason" string="Shipping Hold Reason:" />
+                            <field name="shipping_hold_reason" nolabel="1" />
+                        </p>
+                        <p>
+                            Hold placed by <field name="shipping_hold_user_id"/> on <field name="shipping_hold_date"/>.
+                        </p>
+                        <button name="%(action_shipping_hold_remove_wiz)d" string="Remove Shipping Hold on Account"
+                            type="action" attrs="{'invisible':[('shipping_hold', '!=', True)]}" />
+                    </div>
+				</xpath>
+			</field>
+		</record>
+    </data>
+</openerp>

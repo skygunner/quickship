@@ -1,6 +1,5 @@
-import stock
-import res_users
-import res_company
+import sale, stock
+import res_users, res_company, res_partner, wizard
 import report
 import math
 from PIL import Image

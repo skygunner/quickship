@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<document filename="Picking List.pdf">
+  <template pageSize="(595.0,842.0)" title="Picking List" author="Martin Simon" allowSplitting="20">
+    <pageTemplate id="main">
+      <frame id="first" x1="57.0" y1="57.0" width="480" height="728"/>
+      <pageGraphics>
+        <setFont name="Helvetica" size="8"/>
+        <drawCentredString x="9.5cm" y="0.8cm"><pageNumber/></drawCentredString>
+        <drawCentredString x="10.5cm" y="0.8cm">/</drawCentredString>
+        <drawCentredString x="11.0cm" y="0.8cm"><pageCount/></drawCentredString>
+      </pageGraphics>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Standard_Outline">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table2">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table4">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="TableHeading" fontName="Helvetica-Bold" alignment="LEFT"/>
+    <paraStyle name="Standard" fontName="Helvetica" alignment="LEFT"/>
+    <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="List" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Caption" fontName="Helvetica" fontSize="12.0" leading="15" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="Index" fontName="Helvetica"/>
+    <paraStyle name="TableContents" fontName="Helvetica"/>
+    <paraStyle name="TableContentsCenter" fontName="Helvetica" alignment="CENTER"/>
+    <paraStyle name="TableContentsRight" fontName="Helvetica" alignment="RIGHT"/>
+    <images/>
+  </stylesheet>
+  <story>
+    <para style="Standard">[[ repeatIn(objects, 'o') ]]</para>
+    <blockTable colWidths="160.0,160.0,160.0" style="Table3">
+      <tr>
+        <td>
+          <para style="TableContents">[[ o.origin or '' ]]</para>
+          <para style="TableContents">Printed [[time.strftime("%m/%d/%Y")]]</para>
+        </td>
+        <td>
+            <para style="TableHeading" alignment="CENTER">[[ company.name ]]</para>
+            <para style="TableHeading" alignment="CENTER">Picking List</para>
+        </td>
+        <td alignment="RIGHT">
+            <barCode code="code128" x="200" barHeight="30" barWidth="1" quiet="9" fontName="Times-Roman" fontSize="100"  alignment="RIGHT">[[ o.sale_id.name + ":" + str(o.sale_id.picking_list_version) ]]</barCode>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="Standard">
+      <font color="white"> </font>
+    </para>
+
+    <spacer length="1.25cm"/>
+
+    <para style="Standard">
+        Requested Shipping: [[ o.ship_company_code.upper() or '' ]]
+    </para>
+
+    <spacer length="1.25cm"/>
+
+    <para style="Standard">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="240.0,240.0" style="Table3">
+      <tr>
+        <td>
+          <para style="P10"><b>SOLD TO:</b></para>
+          <para style="terp_default_8">[[ o.partner_id.name or '' ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.street ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.street2 or '' ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.city ]], [[ o.partner_id.state_id.code ]] [[ o.partner_id.zip ]]</para>
+          <para style="terp_default_8">[[ o.partner_id.country_id.name or '' ]]</para>
+        </td>
+        <td>
+          <para style="P10"><b>SHIP TO:</b></para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.name or '' ]]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.street ]]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.street2 or '']]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.city ]], [[ o.sale_id.partner_shipping_id.state_id.code ]] [[ o.sale_id.partner_shipping_id.zip ]]</para>
+          <para style="terp_default_8">[[ o.sale_id.partner_shipping_id.country_id.name or '' ]]</para>
+        </td>
+      </tr>
+    </blockTable>
+
+    <spacer length="1.25cm"/>
+    <para style="Heading">In Warehouse</para>
+    <spacer length="0.5cm"/>
+
+      <blockTable colWidths="96.0,164.0,100.0,120.0" style="Table2">
+      <tr>
+        <td>
+          <para style="TableHeading">Item</para>
+        </td>
+        <td>
+          <para style="TableHeading">Description</para>
+        </td>
+        <td>
+          <para style="TableHeading">Bin</para>
+        </td>
+        <td>
+          <para style="TableHeading">Quantity</para>
+        </td>
+      </tr>
+    </blockTable>
+    <section>
+      <para style="Standard">[[ repeatIn(o.move_line, 'line') ]]</para>
+      <blockTable colWidths="96.0,164.0,100.0,120.0" style="Table2">
+        <tr>
+          <td>
+            <para style="TableContents">[[ line.product_id and line.product_id.code or '' ]]</para>
+          </td>
+          <td>
+            <para style="TableContents">[[ line.product_id and line.product_id.name or '' ]]</para>
+          </td>
+          <td>
+            <para style="TableContents">[[ line.location_id and line.location_id.name or '' ]]</para>
+          </td>
+          <td>
+            <para style="TableContents">[[ formatLang(line.product_qty, digits=0) or 0 ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+    </section>
+    <para style="Standard">
+      <font color="white"> </font>
+    </para>
+
+    <para style="Standard">
+      <font color="white"> </font>
+    </para>
+
+    <spacer length="1.25cm"/>
+
+    <para style="TableHeading">
+        [[ "Note" if o.sale_id and o.sale_id.note else '' ]]
+    </para>
+    <para style="Standard">
+        [[ o.sale_id.note if o.sale_id and o.sale_id.note else '']]
+    </para>
+  </story>
+</document>
+

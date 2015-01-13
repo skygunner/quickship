@@ -116,14 +116,12 @@ namespace.Model.prototype.getSaleOrderID = decorators.deferrable(function (ret, 
     }
 
     if (bypassCache || typeof(that._cache.getSaleOrderID[sale_order_code] == "undefined")) {
-        this._api.get_sale_order(sale_order_code).done(function (sale_orders) {
-            var sale_order = sale_orders[0];
-
-            if (sale_order) {
-                that._cache.getSaleOrderID[sale_order_code] = sale_orders[0].id;
-                ret.resolve(sale_order.id);
-            } else {
+        this._api.get_sale_order(sale_order_code).done(function (sale_order) {
+            if ('message' in sale_order) {
                 ret.reject(sale_order);
+            } else {
+                that._cache.getSaleOrderID[sale_order_code] = sale_order.id;
+                ret.resolve(sale_order.id);
             }
         });
     } else {
@@ -191,6 +189,28 @@ namespace.Model.prototype.createPackage = decorators.deferrable(function (ret, p
         });
 });
 
+namespace.Model.prototype.checkInventoryAvailability = decorators.deferrable(function (ret, picking_id) {
+    this._api.check_inventory_availability(picking_id)
+        .done(function (response) {
+            if (response) {
+                ret.resolve(response);
+            } else {
+                ret.reject(response);
+            }
+        });
+});
+
+namespace.Model.prototype.setDelivered = decorators.deferrable(function (ret, sale_id) {
+    this._api.set_delivered(sale_id)
+        .done(function (response) {
+            if (response) {
+                ret.resolve(response);
+            } else {
+                ret.reject(response);
+            }
+        });
+});
+
 namespace.Model.prototype.getPackList = function (picking_id) {
     this._actionAPI.ir_actions_report_xml({
         "report_name": "stock.packing.list.out", "report_type":"pdf",
@@ -232,7 +252,9 @@ namespace.Model.prototype.getQuote = function (index) {
 namespace.Model.prototype.getLabelByPackageID = decorators.deferrable(function (ret, package_id, quote, customs) {
     this._api.get_label_by_package_id(package_id, quote, customs)
         .done(function (result) {
-            if (!result || !result.label) {
+            if (result && result.error) {
+                ret.reject(result);
+            } else if (!result || !result.label) {
                 ret.reject(result, "Unable to generate label!");
             } else {
                 ret.resolve(result);
@@ -257,7 +279,9 @@ namespace.Model.prototype.getLabelByPackageID = decorators.deferrable(function (
 namespace.Model.prototype.getLabelByPackage = decorators.deferrable(function (ret, pkg, from_address, to_address, quote, customs) {
     this._api.get_label_by_package(pkg, from_address, to_address, quote, customs)
         .done(function (result) {
-            if (!result || !result.label) {
+            if (result && result.error) {
+                ret.reject(result);
+            } else if (!result || !result.label) {
                 ret.reject(result, "Unable to generate label!");
             } else {
                 ret.resolve(result);

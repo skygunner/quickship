@@ -13,11 +13,6 @@ namespace.View = function () {
     // Set up InputPrompt objects.
     $("#sale_order,.participant input,input#box_code, input#num_packages, .subform input").inputPrompt();
 
-    // Lock the box dimensions inputs if the box code is locked as well.
-    $("#box_dimensions input").inputPrompt({
-        lock: this.box.$code.inputPrompt()
-    });
-
     // Lock the shipper input by default.
     this.$shipper.inputPrompt().toggleLock();
 
@@ -74,8 +69,6 @@ namespace.View.prototype.resetQuotesUI = function () {
  */
 namespace.View.prototype.updateWeight = function (reading, scale) {
     scale = scale || this.scale;
-
-    var oldWeight = this.getWeight();
 
     scale.$display.text(reading.weight + " " + reading.unit + "s");
     scale.$weight.val(reading.weight).trigger("change");
@@ -327,9 +320,16 @@ namespace.View.prototype.selectQuote = function (index) {
  */
 namespace.View.prototype.showQuotes = function (quotes) {
     this.$quotes.empty();
+    var serviceName;
 
     for (var i=0; i < quotes.length; i++) {
-        this.$quotes.append("<li>" + quotes[i].service + " - $" + quotes[i].price.toFixed(2) + "</li>");
+        serviceName = quotes[i].service;
+
+        if (serviceName.toLowerCase().indexOf(quotes[i].company.toLowerCase()) !== 0) {
+            serviceName = quotes[i].company + " " + serviceName;
+        }
+
+        this.$quotes.append("<li>" + serviceName + " - $" + quotes[i].price.toFixed(2) + "</li>");
     }
 
    this.$step2.show();

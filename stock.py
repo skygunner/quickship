@@ -22,13 +22,19 @@
 import base64, urllib2
 from collections import namedtuple
 from decimal import Decimal
+from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from shipping_api_ups.api import v1 as ups_api
+from shipping_api_ups.helpers.ups import UPSError
 from shipping_api_ups.helpers.ups import SERVICES as UPS_SERVICES
 from shipping_api_ups.helpers.shipping import get_country_code
 from shipping_api_usps.api import v1 as usps_api
+from shipping_api_usps.helpers.endicia import EndiciaError
 from shipping_api_usps.api.v1 import Customs, CustomsItem
+from shipping_api_fedex.api import v1 as fedex_api
+from shipping_api_fedex.helpers.fedex_wrapper import SERVICES as FEDEX_SERVICES
+from shipping_api_fedex.helpers.fedex_wrapper import FedExError
 from quickship import image_to_epl2
 
 AddressWrapper = namedtuple("AddressWrapper", ['name', 'street', 'street2', 'city', 'state', 'zip', 'country', 'phone'])
@@ -40,24 +46,46 @@ class PackageWrapper(_PackageWrapper):
     def weight(self):
         return round(float(self.weight_in_ozs) / 16, 1)
 
-class sale_order(osv.osv):
-    _inherit = 'sale.order'
+class stock_move(osv.osv):
+    _inherit = 'stock.move'
 
-    def packing_list(self, cr, uid, ids, context=None):
-        if not ids: return []
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'multiple.label.print',
-            'datas': {
-                'model': 'stock.picking',
-                'id': ids and ids[0] or False,
-                'ids': ids,
-                'report_type': 'pdf'
-                },
-            'nodestroy': True
-        }
+    def _get_backorder_qty(self, cr, uid, ids, field_name, args, context=None):
+        values = {}
+        stock_pool = self.pool.get('stock.picking.out')
+        stock_picking = None
 
-sale_order()
+        for line in sorted([l for l in self.browse(cr, uid, ids, context=context)], key=lambda o: o.picking_id.id):
+            values[line.id] = 0
+            if not stock_picking or line.picking_id.id != stock_picking.id:
+                stock_picking = stock_pool.browse(cr, uid, stock_pool.search(
+                    cr, uid, [('backorder_id', '=', line.picking_id.id)], context=context
+                ), context=context)
+
+            if not stock_picking:
+                continue
+
+            for stock_pick in stock_picking[0].move_lines:
+                if line.product_id.id == stock_pick.product_id.id:
+                    values[line.id] = float(stock_pick.product_qty)
+                    break
+
+        return values
+
+    def _get_net_qty(self, cr, uid, ids, field_name, args, context=None):
+        return dict([(line.id, (line.product_qty - line.backorder_qty))
+                       for line in self.browse(cr, uid, ids, context=context)])
+
+
+    _columns = {
+        'backorder_qty': fields.function(_get_backorder_qty, type='float', string="Backordered"),
+        'net_qty': fields.function(_get_net_qty, type='float', string="Net Qty"),
+    }
+    _sql_constraints = [
+        # Add a unique product constraint to allow accurate calculation of backorders on reports and emails.
+        ('unique_product_on_picking', 'unique(picking_id, product_id, id)', 'Delivery order contains duplicate products!')
+    ]
+
+stock_move()
 
 
 class stock_packages(osv.osv):
@@ -68,8 +96,27 @@ class stock_packages(osv.osv):
     def _weight_in_ozs(self, cr, uid, ids, field_name, arg, context):
         return dict([(pkg.id, round(float(pkg.weight)*16, 1)) for pkg in self.browse(cr, uid, ids)])
 
+    def _tracking_url(self, cr, uid, ids, field_name, arg, context):
+        values = {}
+        for package in self.browse(cr, uid, ids):
+            if package.shipping_company and package.shipping_company.ship_tracking_url:
+                values[package.id] = package.shipping_company.ship_tracking_url % package.tracking_no
+            elif package.shipping_company_name == "USPS":
+                values[package.id] = "https://tools.usps.com/go/TrackConfirmAction_input?qtc_tLabels1=" + package.tracking_no
+            elif package.shipping_company_name == "UPS":
+                values[package.id] = "http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=" + package.tracking_no
+            elif package.shipping_company_name == "FedEx":
+                values[package.id] = "http://www.fedex.com/Tracking?action=track&tracknumbers=" + package.tracking_no
+            else:
+                values[package.id] = ""
+
+        return values
+
     _columns = {
         'shipping_company': fields.many2one("logistic.company", "Shipping Company"),
+        'shipping_company_name': fields.char('Shipping Company Name', size=12),
+        'shipping_method': fields.char('Shipping Method', size=124),
+        'tracking_url': fields.function(_tracking_url, method=True),
         'picker_id': fields.many2one("res.users", "Picker", required=True),
         'packer_id': fields.many2one("res.users", "Packer", required=True),
         'shipper_id': fields.many2one("res.users", "Shipper", required=True),
@@ -120,7 +167,7 @@ class stock_packages(osv.osv):
             to_address = AddressWrapper(
                 to_address['name'], to_address['street'], to_address['street2'],
                 to_address['city'], to_address['state'], to_address['zip'], to_address['country'],
-                to_address.get("phone"), is_residence = False
+                to_address.get("phone")
             )
 
          # Get the shipper and recipient addresses if all we have is the picking.
@@ -128,11 +175,13 @@ class stock_packages(osv.osv):
             from_address = picking.company_id.partner_id
             from_address.state = from_address.state_id.code
             from_address.country = from_address.country_id.name
+            from_address.zip = from_address.zip
 
         if picking and not to_address:
             to_address = picking.sale_id.partner_shipping_id or ''
             to_address.state = to_address.state_id.code
             to_address.country = to_address.country_id.name
+            to_address.zip = to_address.zip
             to_address.is_residence = False
 
         # Grab customs info.
@@ -173,10 +222,12 @@ class stock_packages(osv.osv):
                 senders_copy=customs.get("senders_copy") or company.customs_senders_copy,
                 items=customs_items
             )
-            image_format = "PNGMONOCHROME"
 
         # Grab config info
         if shipping["company"] == "USPS":
+            if customs_obj:
+                image_format = "PNGMONOCHROME"
+
             if picking:
                 usps_config = usps_api.get_config(cr, uid, sale=picking.sale_id, context=context)
             else:
@@ -197,8 +248,50 @@ class stock_packages(osv.osv):
                                       from_address=from_address, to_address=to_address, customs=customs_obj,
                                       test=test, image_format=image_format)
 
+        elif shipping["company"] == "FedEx":
+            image_format = "PNG"
+
+            if picking:
+                fedex_config = fedex_api.get_config(cr, uid, sale=picking.sale_id, context=context, test=test)
+            else:
+                fedex_config = fedex_api.get_config(cr, uid, context=context, test=test)
+
+            #services_dict = dict([(name, code) for (code, name) in FEDEX_SERVICES])
+            label = fedex_api.get_label(
+                fedex_config, package, '_'.join([w.upper() for w in shipping["service"].split(' ')]),
+                from_address=from_address, to_address=to_address, customs=customs_obj,
+                test=test, image_format=image_format)
+
         else:
             return {"error": "Shipping company '%s' not recognized." % shipping['company']}
+
+        if hasattr(label, "get") and label.get("error"):
+            return {"error": label["error"]}
+
+        if package_id:
+            logis_pool = self.pool.get("logistic.company")
+            company = self.pool.get("res.users").browse(cr, uid, uid).company_id
+            shipping_company = logis_pool.browse(cr, uid, logis_pool.search(cr, uid, [
+                ('ship_company_code', '=', shipping.get("company", "").lower()),
+                '|', ("company_id", "=", company.id), ("company_id", "=", None)
+            ]))
+
+            if shipping_company and not hasattr(shipping_company, 'id') and len(shipping_company) == 1:
+                shipping_company = shipping_company[0]
+
+            if not shipping_company:
+                return {"error": "Could not find logistic company!"}
+
+            package_update = {
+                "tracking_no": label.tracking, "shipping_company": shipping_company.id,
+                "shipping_company_name": shipping.get("company"), "shipping_method": shipping["service"]
+            }
+
+            if hasattr(label, "shipment_id") and label.shipment_id:
+                package_update['shipment_identific_no'] = label.shipment_id
+
+            self.pool.get("stock.packages").write(cr, uid, package_id, package_update)
+
 
         # If we got something besides EPL2 data, convert it to EPL2 format before sending it client-side.
         if image_format != "EPL2":
@@ -241,44 +334,86 @@ class stock_packages(osv.osv):
             round(Decimal(pkg["scale"]["weight"])*16, 1), pkg["length"], pkg["width"], pkg["height"], pkg.get("value")
         )
 
-        # Now what were we passed for purposes of finding an address?
         if sale_id:
             sale = self.pool.get("sale.order").browse(cr, uid, sale_id)
             usps_config = usps_api.get_config(cr, uid, sale=sale, context=context)
             ups_config = ups_api.get_config(cr, uid, sale=sale, context=context)
+            fedex_config = fedex_api.get_config(cr, uid, sale=sale, context=context)
         else:
             sale = None
             usps_config = usps_api.get_config(cr, uid, context=context)
+            ups_config = ups_api.get_config(cr, uid, context=context)
+            fedex_config = fedex_api.get_config(cr, uid, sale=sale, context=context)
 
         if from_address:
             from_address = AddressWrapper(
                 from_address['name'], from_address['street'], from_address['street2'],
-                from_address['city'], from_address['state'], from_address['zip'], from_address['country']
+                from_address['city'], from_address['state'], from_address['zip'], from_address['country'],
+                from_address.get("phone")
             )
             
         if to_address:
             to_address = AddressWrapper(
                 to_address['name'], to_address['street'], to_address['street2'],
-                to_address['city'], to_address['state'], to_address['zip'], to_address['country']
+                to_address['city'], to_address['state'], to_address['zip'], to_address['country'],
+                to_address.get("phone")
             )
 
         try:
-            return {
-                'quotes': sorted([
-                    quote for quote in usps_api.get_quotes(
-                        usps_config, pkg, sale=sale,from_address=from_address, to_address=to_address, test=test
-                    )
-                ] + [
-                    quote for quote in ups_api.get_quotes(
-                        ups_config, pkg, sale=sale,from_address=from_address, to_address=to_address, test=test
-                    )
-                ], key=lambda x: x["price"])
-            }
-        except urllib2.URLError:
+            company_id = self.pool.get("res.users").browse(cr, uid, uid).company_id.id
+            logis_pool = self.pool.get("logistic.company")
+            available_services = [company.ship_company_code.lower() for company in
+                logis_pool.browse(cr, uid, logis_pool.search(cr, uid, [
+                    '|', ("company_id", "=", company_id), ("company_id", "=", None)
+                ]))]
+
+            ups_quotes = [] if 'ups' not in available_services else ups_api.get_quotes(
+                ups_config, pkg, sale=sale, from_address=from_address, to_address=to_address, test=test
+            )
+
+            usps_quotes = [] if 'usps' not in available_services else usps_api.get_quotes(
+                usps_config, pkg, sale=sale, from_address=from_address, to_address=to_address, test=test
+            )
+
+            seen_fedex_quotes = []
+            filtered_fedex_quotes = []
+
+            fedex_quotes = [] if 'fedex' not in available_services else fedex_api.get_quotes(
+                fedex_config, pkg, sale=sale, from_address=from_address, to_address=to_address, test=test
+            )
+
+            for fedex_quote in fedex_quotes:
+                fedex_quote_key = '%s:%s' % (fedex_quote['service'], fedex_quote['price'])
+
+                if fedex_quote_key in seen_fedex_quotes:
+                    continue
+
+                seen_fedex_quotes.append(fedex_quote_key)
+                filtered_fedex_quotes.append(fedex_quote)
+
+            for i, fedex_quote in enumerate(filtered_fedex_quotes):
+                filtered_fedex_quotes[i]['service'] = ' '.join([
+                    w[0].upper() + w[1:].lower() for w in filtered_fedex_quotes[i]['service'].split('_')
+                ])
+
+        except UPSError as e:
+            return {"success": False, "error": "UPS: " + str(e)}
+
+        except EndiciaError as e:
+            return {"success": False, "error": "Endicia: " + str(e)}
+
+        except FedExError as e:
+            return {"success": False, "error": "FedEx: " + str(e)}
+
+        except urllib2.URLError as e:
+            raise e
             return {
                 "success": False,
-                "error": "Could not connect to Endicia!"
+                "error": "Could not connect to Endicia!" + (" (%s)" % str(e) if str(e) else '')
             }
+
+        return {'quotes': sorted(usps_quotes + ups_quotes + filtered_fedex_quotes, key=lambda x: x["price"])}
+
 
 
     def get_stats(self, cr, uid, fromDate, toDate, test=False):
@@ -325,6 +460,8 @@ class stock_packages(osv.osv):
             ], key=lambda u: u['package_count'], reverse=True)
         }
 
+
+
     def create_package(self, cr, uid, package, sale_order_id, num_packages=1, test=False):
         '''Creates a package and adds it to the sale order's delivery order'''
 
@@ -363,7 +500,7 @@ class stock_packages(osv.osv):
         user_pool = self.pool.get("res.users")
         for field in ["picker_id", "packer_id", "shipper_id"]:
             if package.get(field):
-                properties[field] = user_pool.search(cr, uid, [("quickship_id","=",package[field])], limit=1)
+                properties[field] = user_pool.search(cr, SUPERUSER_ID, [("quickship_id","=",package[field])], limit=1)
 
                 if properties[field]:
                     properties[field] = properties[field][0]
@@ -381,14 +518,26 @@ class stock_packages(osv.osv):
             )
 
         package_id = self.pool.get("stock.packages").create(cr, uid, properties)
-
+        
+        last_package = (num_packages and num_packages >= len(packages)+1)
+        
         return {
             "id": package_id,
             "picking_id": picking_id.id,
             "pack_list": properties["packge_no"] == 1,
+            "last_package": last_package,
             "success": True
         }
 
 stock_packages()
+
+
+class stock_inventory(osv.osv):
+    _inherit = "stock.inventory"
+    _columns = {
+        "company_id": fields.many2one('res.company', 'Company', required=False, select=True, readonly=True, states={'draft':[('readonly',False)]})
+    }
+
+stock_inventory()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

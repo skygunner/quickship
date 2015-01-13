@@ -1,0 +1,23 @@
+.shipping_hold_message {
+    display: block;
+    clear: both;
+    background-color: #b41616;
+    color: #eeeeee;
+    padding: 14px 18px;
+    margin-top: 15px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.openerp .oe_application .shipping_hold_message a {
+    color: #eeeeee;
+    font-weight: bold;
+}
+
+.openerp .oe_form .shipping_hold_message span.oe_form_field {
+    display: inline;
+}

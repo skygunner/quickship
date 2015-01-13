@@ -1,4 +1,4 @@
-Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
+Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance, _options) {
     return new (instance.web.Class.extend({
         init: function(options){
             options = options || {};
@@ -6,6 +6,7 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
             this.rpc = new instance.web.JsonRPC();
             this.rpc.setup(options.url || 'http://localhost:8069');
             this.packages = new instance.web.Model('stock.packages');
+            this.picking = new instance.web.Model('stock.picking');
             this.users = new instance.web.Model('res.users');
             this.package_types = new instance.web.Model('shipping.package.type');
             this.sales = new instance.web.Model('sale.order');
@@ -54,6 +55,15 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
                 num_packages = 1;
             }
             return this.packages.call("create_package", [pkg, sale_order], {"num_packages": num_packages});
+        },
+
+        check_inventory_availability: function (picking_id) {
+            //return this.picking.call("action_assign", [[picking_id]]);
+            return this.picking.call("force_assign", [[picking_id]]);
+        },
+
+        set_delivered: function (sale_id) {
+            return this.sales.call("deliver", [[sale_id]]);
         },
 
         // Convenience function for getting quotes for a package.
@@ -131,7 +141,7 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
         },
 
         get_sale_order: function (code) {
-            return this.sales.query(['id', 'name', 'invoiced']).filter([['name', '=', code]]).all();
+            return this.sales.call('get_by_quickship_code', [code]);
         },
 
         get_quickship_id: function (user_id) {
@@ -141,5 +151,5 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance) {
             }
             return this.users.call('get_quickship_id', [], kwargs);
         }
-    }))();
+    }))(_options);
 };
