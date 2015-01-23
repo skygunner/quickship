@@ -16,6 +16,9 @@ namespace.View = function () {
     // Lock the shipper input by default.
     this.$shipper.inputPrompt().toggleLock();
 
+    // Lock number of packages by default.
+    this.$num_packages.inputPrompt().toggleLock();
+
     // Set initial UI state.
     this.reset();
 };
