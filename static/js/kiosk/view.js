@@ -13,6 +13,12 @@ namespace.View = function () {
     // Set up InputPrompt objects.
     $("#sale_order,.participant input,input#box_code, input#num_packages, .subform input").inputPrompt();
 
+    $("#box_dimensions input").inputPrompt({
+        lock: function () {
+            return $("input#box_code").inputPrompt().isLocked();
+        }
+    });
+
     // Lock the shipper input by default.
     this.$shipper.inputPrompt().toggleLock();
 
