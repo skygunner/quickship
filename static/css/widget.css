@@ -120,15 +120,15 @@ h2 input, h2 select {
     line-height: 1.65em;
 }
 
-#step-1 h4 span {
-    margin-left: 9em;
+#step-1 h3 span {
+    margin-left: 1.4em;
 }
 
-#step-1 h4>input {
-    margin-left: 8.8em;
+#step-1 h3>input {
+    margin-left: 1.8em;
 }
 
-h4 i.foundicon-lock, h4 i.foundicon-unlock {
+h3 i.foundicon-lock, h3 i.foundicon-unlock {
     margin-left: 0.25em;
 }
 

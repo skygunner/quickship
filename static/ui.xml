@@ -23,74 +23,74 @@
                 <label for="sale_order">Sale ID:</label>
                 <input id="sale_order"></input>
             </h2>
-            <h4>
+            <h3>
                 <label for="num_packages"># Packages:</label>
                 <input id="num_packages"></input>
-            </h4>
+            </h3>
         </div>
         <div class="left">
             <div id="manual_entry">
                 <div id="from_address" class="floating subform">
                     <h2>From Address</h2>
-                    <h4>
+                    <h3>
                         <label for="from_name">Name:</label>
                         <input id="from_name" class="name" name="name"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="from_street">Address (line 1):</label>
                         <input id="from_street" class="street" name="street"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="from_street2">Address (line 2):</label>
                         <input id="from_street2" class="street2 optional" name="street2"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="from_city">City:</label>
                         <input id="from_city" class="city" name="city"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="from_state">State/Province:</label>
                         <input id="from_state" class="state" name="state" maxlength="2"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="from_zip">Zip Code:</label>
                         <input id="from_zip" class="zip" name="zip"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="from_country">Country Code:</label>
                         <input id="from_country" class="country" name="country"></input>
-                    </h4>
+                    </h3>
                 </div>
                 <div id="to_address" class="floating subform">
                     <h2>To Address</h2>
-                    <h4>
+                    <h3>
                         <label for="to_name">Name:</label>
                         <input id="to_name" class="name" name="name"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="to_street">Address (line 1):</label>
                         <input id="to_street" class="street" name="street"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="to_street2">Address (line 2):</label>
                         <input id="to_street2" class="street2 optional" name="street2"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="to_city">City:</label>
                         <input id="to_city" class="city" name="city"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="to_state">State/Province:</label>
                         <input id="to_state" class="state" name="state" maxlength="2"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="to_zip">Zip Code:</label>
                         <input id="to_zip" class="zip" name="zip"></input>
-                    </h4>
-                    <h4>
+                    </h3>
+                    <h3>
                         <label for="to_country">Country Code:</label>
                         <input id="to_country" class="country" name="country"></input>
-                    </h4>
+                    </h3>
                 </div>
                 <div class="subform" id="manual_customs">
                     <h2>
@@ -140,14 +140,14 @@
                     <label for="box_code">Box Code:</label>
                     <input id="box_code"></input>
                 </h2>
-                <h4>
+                <h3>
                     <label for="box_dimensions">Dimensions:</label>
                     <span id="box_dimensions">
                         <input id="box_length" maxlength="2" placeholder="L"></input>
                         x <input id="box_width" maxlength="2" placeholder="W"></input>
                         x <input id="box_height" maxlength="2" placeholder="H"></input>
                     </span>
-                </h4>
+                </h3>
             </p>
             <p>
                 <input type="checkbox" id="autoprint" name="autoprint" value="1"/>
