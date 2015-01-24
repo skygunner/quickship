@@ -37,4 +37,10 @@ class res_users(osv.osv):
     def get_quickship_id(self, cr, uid, user_id=None):
         return self.pool.get("res.users").browse(cr, uid, user_id or uid).quickship_id
 
+    def get_proxy_settings(self, cr, uid, context=None):
+        return {
+            'printer': self.get_printer_proxy_settings(cr, uid),
+            'scale': self.get_scale_proxy_settings(cr, uid)
+        }
+
 res_users()

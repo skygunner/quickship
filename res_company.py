@@ -68,22 +68,6 @@ class res_company(osv.osv):
         "packing_list_text": "Thank you for your business!"
     }
 
-    def get_proxy_settings(self, cr, uid, context=None):
-        user = self.pool.get("res.users").browse(cr, uid, uid)
-
-        return {
-            'printer': {
-                'url': user.company_id.printer_proxy_url,
-                'username': user.company_id.printer_proxy_username,
-                'password': user.company_id.printer_proxy_password
-            },
-            'scale': {
-                'url': user.company_id.scale_proxy_url,
-                'username': user.company_id.scale_proxy_username,
-                'password': user.company_id.scale_proxy_password
-            }
-        }
-
 res_company()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -33,9 +33,9 @@ openerp.quickship = function (instance) {
         start: function () {
             // Kick off our model, view, and controller classes.
 
-            (new instance.web.Model('res.company')).call('get_proxy_settings').done(function (settings) {
+            (new instance.web.Model('res.users')).call('get_proxy_settings').done(function (settings) {
                 instance.quickship._printerAPI = new instance.printer_proxy.Printer({
-                    name: "zebra", url: settings.printer.url,
+                    name: settings.printer.name, url: settings.printer.url,
                     username: settings.printer.username, password: settings.printer.password
                 });
                 instance.quickship._scaleAPI = new instance.scale_proxy.Scale({
