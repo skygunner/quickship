@@ -241,8 +241,18 @@ namespace.Controller.prototype.getQuotes = function (pkg, sale_id, from_address,
            }
         })
         .fail(function (response) {
+            invalidAddressMessages = [
+                /The postal code [^ ]* *is invalid/g,
+                "Missing or invalid data element: ToPostalCode.",
+                "Destination postal code missing or invalid."
+            ]
+
             that.options.logger.error(response);
             that.options.message.error(response.error);
+
+            if (invalidAddressMessages.some(function (m) { return response.error.search(m) != -1 })) {
+                that._openCustomerForm();
+            }
 
             if (response.field) {
                 that.view.elementByField(response.field).val('').focus();
