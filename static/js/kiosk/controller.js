@@ -51,6 +51,7 @@ namespace.Controller.prototype.setupEvents = function () {
     that._setupInputCompleteEvent();
     that._setupBoxCodeSelectedEvent();
     that._setupSaleOrderChangeEvent();
+    that._setupSaleOrderEditButtons();
     that._setupCountryCodeChangeEvent();
 };
 
@@ -447,12 +448,81 @@ namespace.Controller.prototype._setupSaleOrderChangeEvent = function () {
 
         that.model
             .getSaleOrderID(sale_order_code)
+            .done(function () {
+                that.view.showSaleOrderButtons();
+            })
             .fail(function (err) {
                 that.view.$sale_order.val('').focus();
                 that.options.message.error(err.message);
             })
     })
 };
+
+/**
+ * Set up event handlers for clicks on "edit sale" and "edit customer" buttons.
+ *
+ * @private
+ */
+namespace.Controller.prototype._setupSaleOrderEditButtons = function () {
+    var that = this;
+
+    that.view.$edit_sale.click(function () {
+        that._openSaleForm();
+    });
+
+    that.view.$edit_customer.click(function () {
+        that._openCustomerForm();
+    });
+};
+
+/**
+ * Opens the sale order in a popup form for editing.
+ */
+namespace.Controller.prototype._openSaleForm = function () {
+    var that = this;
+
+    that.model
+        .getSaleOrderID(that.view.getSaleOrder()) // Function caches sale order IDs, so no efficiency worries!
+        .done(function (sale_id) {
+            that.model.do_action({
+                'type': 'ir.actions.act_window',
+                'name': 'Sale Order',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'views': [[false, 'form']],
+                'res_model': 'sale.order',
+                'nodestroy': true,
+                'res_id': sale_id,
+                'target':'new',
+                'context': {'show_footer': true}
+            });
+        });
+};
+
+/**
+ * Opens the sale order's customer in a popup form for editing.
+ */
+namespace.Controller.prototype._openCustomerForm = function () {
+    var that = this;
+
+    that.model
+        .getCustomerID(that.view.getSaleOrder())
+        .done(function (customer_id) {
+            that.model.do_action({
+                'type': 'ir.actions.act_window',
+                'name': 'Customer',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'views': [[false, 'form']],
+                'res_model': 'res.partner',
+                'nodestroy': true,
+                'res_id': customer_id,
+                'target':'new',
+                'context': {'show_footer': true}
+            });
+        });
+};
+
 
 /**
  * Set up an event that triggers shipping quote generation and autoprinting

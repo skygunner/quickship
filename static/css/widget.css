@@ -193,6 +193,14 @@ h2#scale #weight {
     margin-bottom: 0em;
 }
 
+#sale_order_edit {
+    visibility: hidden;
+}
+
+#sale_order_edit.visible {
+    visibility: visible;
+}
+
 .left {
     float: left;
     clear: left;

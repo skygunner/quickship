@@ -27,6 +27,12 @@
                             type="action" attrs="{'invisible':[('shipping_hold', '!=', True)]}" />
                     </div>
 				</xpath>
+
+                <xpath expr="/form/sheet" position="after">
+                    <footer invisible="'show_footer' not in context or not context['show_footer']">
+                        <button name="write" type="object" string="Save"/> or <button name="cancel" string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </xpath>
 			</field>
 		</record>
     </data>

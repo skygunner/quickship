@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+        <record id="view_order_form" model="ir.ui.view">
+			<field name="name">view_order_form</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="sale.view_order_form" />
+			<field name="arch" type="xml">
+				<xpath expr="/form/sheet" position="after">
+                    <footer invisible="'show_footer' not in context or not context['show_footer']">
+                        <button name="write" type="object" string="Save"/> or <button name="cancel" string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </xpath>
+			</field>
+		</record>
+    </data>
+</openerp>

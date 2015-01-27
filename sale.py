@@ -131,6 +131,14 @@ class sale_order(osv.Model):
             'nodestroy': True
         }
 
+    def get_customer_id(self, cr, uid, ids, context=None):
+        res = self.get_by_quickship_code(cr, uid, ids, context=context)
+
+        if 'id' not in res:
+            return res
+
+        sale_order = self.browse(cr, uid, res['id'], context=context)
+        return {"id": sale_order.partner_shipping_id.id if sale_order.partner_shipping_id else sale_order.partner_id.id}
 
 sale_order()
 

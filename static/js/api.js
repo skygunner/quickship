@@ -144,6 +144,10 @@ Namespace("ryepdx.openerp.quickship").ApiFactory = function (instance, _options)
             return this.sales.call('get_by_quickship_code', [code]);
         },
 
+        get_customer_id: function (code) {
+            return this.sales.call('get_customer_id', [code]);
+        },
+
         get_quickship_id: function (user_id) {
             kwargs = {}
             if (user_id) {

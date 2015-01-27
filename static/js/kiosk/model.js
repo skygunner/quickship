@@ -130,6 +130,33 @@ namespace.Model.prototype.getSaleOrderID = decorators.deferrable(function (ret, 
 });
 
 /**
+ * Takes a sale order code and returns its customer ID.
+ *
+ * @param sale_order_code
+ * @return sale_order_id
+ */
+namespace.Model.prototype.getCustomerID = decorators.deferrable(function (ret, sale_order_code, bypassCache) {
+    var that = this;
+
+    if (typeof(that._cache.getCustomerID) == "undefined") {
+        that._cache.getCustomerID = {};
+    }
+
+    if (bypassCache || typeof(that._cache.getCustomerID[sale_order_code] == "undefined")) {
+        this._api.get_customer_id(sale_order_code).done(function (customer) {
+            if ('message' in sale_order) {
+                ret.reject(customer);
+            } else {
+                that._cache.getCustomerID[sale_order_code] = customer.id;
+                ret.resolve(customer.id);
+            }
+        });
+    } else {
+        ret.resolve(that._cache.getCustomerID[sale_order_code]);
+    }
+});
+
+/**
  * Create a package for the given sale order and get a list of shipping quotes for it.
  *
  * @param sale_order
@@ -216,7 +243,11 @@ namespace.Model.prototype.getPackList = function (picking_id) {
         "report_name": "stock.packing.list.out", "report_type":"pdf",
         "context": {"active_ids": [picking_id]}
     }, { on_close: function () {} });
-}
+};
+
+namespace.Model.prototype.do_action = function (action) {
+    return this._actionAPI.do_action(action);
+};
 
 /**
  * Return a quote in our quotes cache, specified by 0-based index.

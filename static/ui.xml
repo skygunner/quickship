@@ -28,6 +28,10 @@
                 <input id="num_packages" value="1"></input>
             </h3>
         </div>
+        <div id="sale_order_edit">
+            <button id="edit_sale_button" accesskey="s">Edit <u>S</u>ale</button>
+            <button id="edit_sale_customer" accesskey="c">Edit <u>C</u>ustomer</button>
+        </div>
         <div class="left">
             <div id="manual_entry">
                 <div id="from_address" class="floating subform">

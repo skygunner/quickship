@@ -57,6 +57,7 @@ namespace.View.prototype.reset = function () {
 namespace.View.prototype.resetPackageUI = function () {
     this.clear();
     this.hideManualEntry();
+    this.hideSaleOrderButtons();
     this.$picker.focus();
 };
 
@@ -352,7 +353,7 @@ namespace.View.prototype.showManualEntry = function () {
     this.$num_packages.parent().hide();
     this.$num_packages.val('');
     this.$manual_entry.show().find("input").val('');
-}
+};
 
 /**
  * Hide address entry for manual shipping actions.
@@ -360,6 +361,21 @@ namespace.View.prototype.showManualEntry = function () {
 namespace.View.prototype.hideManualEntry = function () {
     this.$num_packages.parent().show();
     this.$manual_entry.hide();
+};
+
+
+/**
+ * Show sale order editing buttons.
+ */
+namespace.View.prototype.showSaleOrderButtons = function () {
+    this.$edit_sale.parent().addClass("visible");
+};
+
+/**
+ * Hide sale order editing buttons.
+ */
+namespace.View.prototype.hideSaleOrderButtons = function () {
+    this.$edit_sale.parent().removeClass("visible");
 };
 
 /**
@@ -410,6 +426,8 @@ namespace.View.prototype._setupProperties = function () {
         $width: $("#box_width"),
         $height: $("#box_height")
     };
+    this.$edit_sale = $("#edit_sale_button");
+    this.$edit_customer = $("#edit_sale_customer");
     this.$num_packages = $("#num_packages");
     this.$step2 = $("#step-2");
     this.$quotes = $("#quotes_list");

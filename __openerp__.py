@@ -37,6 +37,7 @@
         'stock_package_view.xml',
         'wizard/shipping_hold.xml',
         'res_partner_view.xml',
+        'sale_view.xml'
     ],
     'init_xml': [
         'data/shipping.package.type.xml'
