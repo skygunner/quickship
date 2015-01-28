@@ -244,7 +244,8 @@ namespace.Controller.prototype.getQuotes = function (pkg, sale_id, from_address,
             invalidAddressMessages = [
                 /The postal code [^ ]* *is invalid/g,
                 "Missing or invalid data element: ToPostalCode.",
-                "Destination postal code missing or invalid."
+                "Destination postal code missing or invalid.",
+                "There are no valid services available."
             ]
 
             that.options.logger.error(response);
